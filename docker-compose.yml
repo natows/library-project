@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: library-db
+    restart: always
+    environment:
+      POSTGRES_DB: library_db
+      POSTGRES_USER: nati
+      POSTGRES_PASSWORD: nati_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - library_data:/var/lib/postgresql/data
+
+volumes:
+  library_data:

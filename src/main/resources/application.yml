@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: library
+  datasource:
+    url: jdbc:postgresql://localhost:5432/library_db
+    username: nati
+    password: nati_pass
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  sql:
+    init:
+      mode: always  
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+  security:
+    user:
+      name: nati
+      password: nati_pass
+
+server:
+  port: 8080

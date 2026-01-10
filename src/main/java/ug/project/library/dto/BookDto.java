@@ -1,56 +1,28 @@
-package ug.project.library.model.entity;
+package ug.project.library.dto;
+
+import ug.project.library.model.entity.Author;
+import ug.project.library.model.entity.Genre;
 
 import java.util.List;
 
-import jakarta.persistence.*;
-
-
-@Entity
-@Table(name = "books")
-public class Book {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class BookDto {
     private Long id;
-    
-    @Column(nullable = false)
     private String title;
-
-    @ManyToMany
-    @JoinTable(
-        name = "book_author",
-        joinColumns = @JoinColumn(name = "book_id"),
-        inverseJoinColumns = @JoinColumn(name = "author_id")
-    )
     private List<Author> authors;
-
-
-    @ManyToMany
-    @JoinTable(
-        name = "book_genre",
-        joinColumns = @JoinColumn(name = "book_id"),
-        inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
     private List<Genre> genres;
-
-    //tez pewnie jakas tabela laczaca z userem
-    public double rating;
-
-    @Column(length = 4)
+    private double rating;
     private int yearPublished;
-
-    @Column(nullable = false)
-    private String publisher;// moze jako klasa?
-
+    private String publisher;
     private String coverImageUrl;
-
     private int quantityAvailable;
 
 
-    public Book() {
+    public BookDto() {
+
     }
-    
-    public Book(String title, List<Author> authors, List<Genre> genres, double rating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable){
+
+    public BookDto(Long id, String title, List<Author> authors, List<Genre> genres, double rating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable) {
+        this.id = id;
         this.title = title;
         this.authors = authors;
         this.genres = genres;
@@ -60,13 +32,11 @@ public class Book {
         this.coverImageUrl = coverImageUrl;
         this.quantityAvailable = quantityAvailable;
     }
-
-    public Long getId() {
-        return id;
+    public void setId(Long id){
+        this.id=id;
     }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId(){
+        return id;
     }
 
     public String getTitle() {
@@ -98,7 +68,7 @@ public class Book {
     }
 
     public void setRating(double rating) {
-        this.rating = rating;
+        this.rating = rating; //jak bedziesz robic te flagi to tu ma byc przedzial 0 -10
     }
 
     public int getYearPublished() {
