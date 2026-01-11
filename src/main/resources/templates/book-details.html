@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${book.title} + ' - Library'">Book Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* Navbar Styles - same as index.html */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-brand svg {
+            width: 32px;
+            height: 32px;
+            margin-right: 0.5rem;
+        }
+
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .navbar-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Book Detail Styles */
+        .content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .book-detail-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .book-cover {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .book-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .book-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-authors {
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .book-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .book-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .genre-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .book-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            color: #ffc107;
+        }
+
+        .availability {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #cccccc;        
+            color: #666666;            
+            cursor: not-allowed;       
+            opacity: 0.6;               
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                </svg>
+                Library
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/catalog">Catalog</a></li>
+                <li><a href="/popular">Popular</a></li>
+                <li><a href="/my-books">My Books</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content">
+        <a href="/" class="back-link">
+            ← Back to catalog
+        </a>
+
+        <div class="book-detail-container">
+            <div>
+                <img th:src="${book.coverImageUrl}" 
+                     th:alt="${book.title}" 
+                     class="book-cover">
+            </div>
+
+            <div class="book-info">
+                <div>
+                    <h1 class="book-title" th:text="${book.title}">Book Title</h1>
+                    <div class="book-authors">
+                        <span th:each="author, iterStat : ${book.authors}">
+                            <span th:text="${author.fullName}">Author Name</span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="book-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Publisher</span>
+                        <span class="meta-value" th:text="${book.publisher}">Publisher Name</span>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-label">Year Published</span>
+                        <span class="meta-value" th:text="${book.yearPublished}">2024</span>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-label">Rating</span>
+                        <div class="book-rating">
+                              <span th:text="${book.rating}">4.5</span>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-label">Availability</span>
+                        <div th:classappend="${book.quantityAvailable > 0} ? 'available' : 'unavailable'" 
+                             class="availability">
+                            <span th:if="${book.quantityAvailable > 0}" 
+                                  th:text="'Available (' + ${book.quantityAvailable} + ' copies)'">Available</span>
+                            <span th:unless="${book.quantityAvailable > 0}">Out of stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Genres -->
+                <div>
+                    <span class="meta-label">Genres</span>
+                    <div class="book-genres">
+                        <span class="genre-tag" th:each="genre : ${book.genres}" 
+                              th:text="${genre.name}">Genre</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a th:href="${book.quantityAvailable > 0} ? @{/reservation/{id}(id=${book.id})} : '#'" 
+                       class="btn btn-primary" 
+                       th:style="${book.quantityAvailable == 0} ? 'pointer-events: none; opacity: 0.6;' : ''">
+                        Reserve Book
+                    </a>
+                    <button class="btn btn-secondary">
+                        Add to Wishlist
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

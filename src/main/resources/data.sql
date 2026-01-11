@@ -7,3 +7,4 @@ INSERT INTO genres (name) VALUES
 ('Fantasy'),
 ('Science Fiction')
 ON CONFLICT (name) DO NOTHING;
+

@@ -35,8 +35,14 @@ public class BookController{
 
     @GetMapping("/all")
     public ResponseEntity<Page<BookDto>> getAllBooks(Pageable pageable){
-        Page<BookDto> booksDto = bookService.getAllBooks(pageable);
+        Page<BookDto> booksDto = bookService.getAllBooksDto(pageable);
         return ResponseEntity.ok(booksDto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BookDto> getBookById(@PathVariable Long id){
+        BookDto bookDto = bookService.getBookDtoById(id);
+        return ResponseEntity.ok(bookDto);
     }
 
     @PostMapping("/add")

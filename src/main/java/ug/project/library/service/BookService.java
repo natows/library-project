@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ug.project.library.dto.BookDto;
-import ug.project.library.dto.BookDto;
-import ug.project.library.exceptions.BookNotFoundException;
+import ug.project.library.exceptions.*;
 import ug.project.library.model.entity.Book;
 import ug.project.library.repository.BookRepository;
 import java.util.stream.Collectors;
@@ -32,8 +31,16 @@ public class BookService {
         return bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
     }
 
+
+
     @Transactional(readOnly = true)
-    public Page<BookDto> getAllBooks(Pageable pageable){
+    public BookDto getBookDtoById(Long id){
+        Book book = getBookById(id);
+        return mapBookToDto(book);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BookDto> getAllBooksDto(Pageable pageable){
         Page<Book> books = bookRepository.findAll(pageable);
         Page<BookDto> booksDto = books.map(this::mapBookToDto);
         return booksDto;
@@ -89,9 +96,7 @@ public class BookService {
     }
 
     private BookDto mapBookToDto(Book book) {
-        return new BookDto(
-            book.getId(),
-            book.getTitle(),
+        return new BookDto(book.getId(), book.getTitle(),
             book.getAuthors(),
             book.getGenres(),
             book.getRating(),
@@ -101,6 +106,30 @@ public class BookService {
             book.getQuantityAvailable()
         );
     }
+
+    private void validateBookAvailable(Book book ){
+        if (book.getQuantityAvailable() <= 0) {
+            throw new BookNotAvailableException(book.getTitle(), book.getId());
+        }
+    }
+    
+
+    @Transactional
+    public void deincrementQuantityAvailable(Book book){
+        validateBookAvailable(book);
+        int currentQuantity = book.getQuantityAvailable();
+        book.setQuantityAvailable(currentQuantity-1);
+        bookRepository.save(book);
+    }
+
+    @Transactional
+    public void incrementQuantityAvailable(Book book){
+        int currentQuantity = book.getQuantityAvailable();
+        book.setQuantityAvailable(currentQuantity+1);
+        bookRepository.save(book);
+    }
+
+   
 
     
 

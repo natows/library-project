@@ -31,3 +31,20 @@ CREATE TABLE IF NOT EXISTS book_genre (
     genre_id BIGINT REFERENCES genres(id),
     PRIMARY KEY (book_id, genre_id)
 );
+
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    encrypted_password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    user_role VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS reservations (
+    id BIGSERIAL PRIMARY KEY,
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    book_id BIGINT NOT NULL REFERENCES books(id)
+);

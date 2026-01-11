@@ -1,9 +1,12 @@
 package ug.project.library.model.entity;
 
 import jakarta.persistence.*;
+import ug.project.library.model.enumerate.UserRole;
+import jakarta.validation.constraints.Email; 
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
-@Table(name="Users")
+@Table(name="users")
 public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -12,18 +15,26 @@ public class User {
     @Column(unique=true)
     private String username;
 
-    private String encryotedPassword;
+    @Column(nullable = false)
+    private String encryptedPassword;
 
     @Column(unique=true)
+    @Email(message = "Niepoprawny adres email")
+    @NotBlank(message = "Email nie może być pusty")
     private String email;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
 
     public User() {
     }
 
-    public User(String username, String encryotedPassword, String email) {
+    public User(String username, String encryptedPassword, String email, UserRole userRole) {
         this.username = username;
-        this.encryotedPassword = encryotedPassword;
+        this.encryptedPassword = encryptedPassword;
         this.email = email;
+
+        this.userRole = userRole;
     }
 
     public Long getId() {
@@ -42,12 +53,12 @@ public class User {
         this.username = username;
     }
 
-    public String getEncryotedPassword() {
-        return encryotedPassword;
+    public String getEncryptedPassword() {
+        return encryptedPassword;
     }
 
-    public void setEncryotedPassword(String encryotedPassword) {
-        this.encryotedPassword = encryotedPassword;
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
     }
 
     public String getEmail() {
@@ -57,4 +68,13 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public UserRole getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(UserRole role) {
+        this.userRole = role;
+    }
+
 }

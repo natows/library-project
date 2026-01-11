@@ -22,10 +22,19 @@ spring:
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
 
-  security:
-    user:
-      name: nati
-      password: nati_pass
+  # security:
+  #   user:
+  #     name: nati
+  #     password: nati_pass
+
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+  
+  thymeleaf:
+    cache: false
 
 server:
   port: 8080
