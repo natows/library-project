@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ug.project.library.service.ReservationService;
-import ug.project.library.dto.BookDto;
+import ug.project.library.dto.ReservationDto;
 import ug.project.library.service.BookService;
 import ug.project.library.model.entity.*;
 
@@ -26,17 +26,43 @@ import ug.project.library.model.entity.*;
 @RestController
 @RequestMapping("api/reservation")
 public class ReservationController {
-    private ReservationService reservationService;
+    private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService){
         this.reservationService = reservationService;
     }
 
     @PostMapping("/{bookId}")
-    public ResponseEntity<Reservation> makeReservation(@PathVariable Long bookId) {
-        Reservation reservation = reservationService.createNewReservation(bookId);
+    public ResponseEntity<ReservationDto> makeReservation(@PathVariable Long bookId) {
+        ReservationDto reservation = reservationService.createNewReservation(bookId);
         return ResponseEntity.ok(reservation);
     }
+
+    @PutMapping("/{reservationId}/confirm")
+    public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long reservationId) {
+        ReservationDto reservation = reservationService.confirmReservation(reservationId);
+        return ResponseEntity.ok(reservation);
+    }
+
+    @PutMapping("/{reservationId}/borrow")
+    public ResponseEntity<ReservationDto> borrowReservation(@PathVariable Long reservationId) {
+        ReservationDto reservation = reservationService.borrowReservation(reservationId);
+        return ResponseEntity.ok(reservation);
+    }
+
+    @PutMapping("/{reservationId}/return")
+    public ResponseEntity<ReservationDto> returnReservation(@PathVariable Long reservationId) {
+        ReservationDto reservation = reservationService.returnReservation(reservationId);
+        return ResponseEntity.ok(reservation);
+    }
+
+    @DeleteMapping("/{reservationId}/cancel")
+    public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId) {
+        reservationService.cancelReservation(reservationId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 
 }

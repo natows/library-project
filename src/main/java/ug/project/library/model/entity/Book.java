@@ -1,8 +1,10 @@
 package ug.project.library.model.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
+import ug.project.library.model.entity.Rating;
 
 
 @Entity
@@ -33,8 +35,11 @@ public class Book {
     )
     private List<Genre> genres;
 
-    //tez pewnie jakas tabela laczaca z userem
-    public double rating;
+    @Column(name = "avgRating" )
+    private Double avgRating;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    private List<Rating> ratings = new ArrayList<>();
 
     @Column(length = 4)
     private int yearPublished;
@@ -50,11 +55,11 @@ public class Book {
     public Book() {
     }
     
-    public Book(String title, List<Author> authors, List<Genre> genres, double rating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable){
+    public Book(String title, List<Author> authors, List<Genre> genres, Double avgRating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable){
         this.title = title;
         this.authors = authors;
         this.genres = genres;
-        this.rating = rating;
+        this.avgRating = avgRating;
         this.yearPublished = yearPublished;
         this.publisher = publisher;
         this.coverImageUrl = coverImageUrl;
@@ -93,12 +98,12 @@ public class Book {
         this.genres = genres;
     }
 
-    public double getRating() {
-        return rating;
+    public Double getAvgRating() {
+        return avgRating;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setAvgRating(Double avgRating) {
+        this.avgRating = avgRating;
     }
 
     public int getYearPublished() {

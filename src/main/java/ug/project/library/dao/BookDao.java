@@ -32,9 +32,9 @@ public class BookDao {
         return jdbcTemplate.query(sql, new BookRowMapper(), "%" + authorName + "%", genreName);
     }
 
-    public int updateBookQuantity(Long bookId, int quantity) {
-        String sql = "UPDATE books SET quantity_available = ? WHERE id = ?";
-        return jdbcTemplate.update(sql, quantity, bookId);
+    public int deincrementQuantityAvailable(Long bookId) {
+        String sql = "UPDATE books SET quantity_available = quantity_available - 1 WHERE id = ?";
+        return jdbcTemplate.update(sql, bookId);
     }
 
     public int incrementBookQuantity(Long bookId) {
@@ -48,7 +48,7 @@ public class BookDao {
             Book book = new Book();
             book.setId(rs.getLong("id"));
             book.setTitle(rs.getString("title"));
-            book.setRating(rs.getDouble("rating"));
+            book.setAvgRating(rs.getDouble("avg_rating"));
             book.setYearPublished(rs.getInt("year_published"));
             book.setPublisher(rs.getString("publisher"));
             book.setCoverImageUrl(rs.getString("cover_image_url"));

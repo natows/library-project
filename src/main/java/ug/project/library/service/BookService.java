@@ -14,6 +14,7 @@ import ug.project.library.exceptions.*;
 import ug.project.library.model.entity.Book;
 import ug.project.library.repository.BookRepository;
 import java.util.stream.Collectors;
+import ug.project.library.dao.*;
 
 
 @Service
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookDao bookDao;
 
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, BookDao bookDao) {
         this.bookRepository = bookRepository;
+        this.bookDao = bookDao;
     }
 
     @Transactional(readOnly = true)
@@ -71,7 +74,7 @@ public class BookService {
         book.setTitle(bookDto.getTitle());
         book.setAuthors(bookDto.getAuthors());
         book.setGenres(bookDto.getGenres());
-        book.setRating(bookDto.getRating());
+        book.setAvgRating(bookDto.getAvgRating());
         book.setYearPublished(bookDto.getYearPublished());
         book.setPublisher(bookDto.getPublisher());
         book.setCoverImageUrl(bookDto.getCoverImageUrl());
@@ -91,7 +94,7 @@ public class BookService {
 
 
     private Book mapDtoToBook(BookDto bookDto){
-        Book book = new Book(bookDto.getTitle(), bookDto.getAuthors(), bookDto.getGenres(), bookDto.getRating(), bookDto.getYearPublished() , bookDto.getPublisher(), bookDto.getCoverImageUrl(), bookDto.getQuantityAvailable() );
+        Book book = new Book(bookDto.getTitle(), bookDto.getAuthors(), bookDto.getGenres(), bookDto.getAvgRating(), bookDto.getYearPublished() , bookDto.getPublisher(), bookDto.getCoverImageUrl(), bookDto.getQuantityAvailable() );
         return book;
     }
 
@@ -99,7 +102,7 @@ public class BookService {
         return new BookDto(book.getId(), book.getTitle(),
             book.getAuthors(),
             book.getGenres(),
-            book.getRating(),
+            book.getAvgRating(),
             book.getYearPublished(),
             book.getPublisher(),
             book.getCoverImageUrl(),
@@ -117,16 +120,12 @@ public class BookService {
     @Transactional
     public void deincrementQuantityAvailable(Book book){
         validateBookAvailable(book);
-        int currentQuantity = book.getQuantityAvailable();
-        book.setQuantityAvailable(currentQuantity-1);
-        bookRepository.save(book);
+        bookDao.deincrementQuantityAvailable(book.getId());
     }
 
     @Transactional
     public void incrementQuantityAvailable(Book book){
-        int currentQuantity = book.getQuantityAvailable();
-        book.setQuantityAvailable(currentQuantity+1);
-        bookRepository.save(book);
+        bookDao.incrementBookQuantity(book.getId());
     }
 
    

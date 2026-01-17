@@ -14,7 +14,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Page<Book> findByTitleContaining(String keyword, Pageable pageable);
     Page<Book> findByPublisher(String keyword, Pageable pageable);
 
-    @Query("SELECT b FROM Book b ORDER BY b.rating DESC")
+    @Query("SELECT b FROM Book b ORDER BY b.avgRating DESC")
     List<Book> findTopRatedBooks(Pageable pageable);
     
 }

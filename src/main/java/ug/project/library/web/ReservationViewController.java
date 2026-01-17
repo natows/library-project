@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ug.project.library.service.BookService;
 import ug.project.library.service.ReservationService;
-import ug.project.library.dto.BookDto;
+import ug.project.library.dto.*;
 import ug.project.library.model.entity.Reservation;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -34,7 +34,7 @@ public class ReservationViewController {
     @PostMapping("/{bookId}")
     public String makeReservation(@PathVariable Long bookId, RedirectAttributes redirectAttributes) {
         try {
-            Reservation reservation = reservationService.createNewReservation(bookId);
+            ReservationDto reservation = reservationService.createNewReservation(bookId);
             redirectAttributes.addFlashAttribute("success", "Rezerwacja została utworzona pomyślnie!");
             return "redirect:/my-books";
         } catch (Exception e) {

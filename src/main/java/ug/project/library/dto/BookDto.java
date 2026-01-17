@@ -10,7 +10,7 @@ public class BookDto {
     private String title;
     private List<Author> authors;
     private List<Genre> genres;
-    private double rating;
+    private Double avgRating;
     private int yearPublished;
     private String publisher;
     private String coverImageUrl;
@@ -21,12 +21,12 @@ public class BookDto {
 
     }
 
-    public BookDto(Long id, String title, List<Author> authors, List<Genre> genres, double rating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable) {
+    public BookDto(Long id, String title, List<Author> authors, List<Genre> genres, Double avgRating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable) {
         this.id = id;
         this.title = title;
         this.authors = authors;
         this.genres = genres;
-        this.rating = rating;
+        this.avgRating = avgRating;
         this.yearPublished = yearPublished;
         this.publisher = publisher;
         this.coverImageUrl = coverImageUrl;
@@ -63,12 +63,12 @@ public class BookDto {
         this.genres = genres;
     }
 
-    public double getRating() {
-        return rating;
+    public Double getAvgRating() {
+        return avgRating;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating; //jak bedziesz robic te flagi to tu ma byc przedzial 0 -10
+    public void setAvgRating(Double avgRating) {
+        this.avgRating = avgRating; //jak bedziesz robic te flagi to tu ma byc przedzial 0 -10
     }
 
     public int getYearPublished() {

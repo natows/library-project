@@ -25,14 +25,17 @@ public class Reservation {
     @JoinColumn(name = "book_id")
     private Book book;
 
+    private LocalDateTime deadline;
+
     public Reservation() {
     }
 
-    public Reservation(ReservationStatus status, LocalDateTime createdAt, User user, Book book) {
+    public Reservation(ReservationStatus status, LocalDateTime createdAt, User user, Book book, LocalDateTime deadline) {
         this.status = status;
         this.createdAt = createdAt;
         this.user = user;
         this.book = book;
+        this.deadline = deadline;
     }
 
     public Long getId() {
@@ -73,5 +76,13 @@ public class Reservation {
 
     public void setBook(Book book) {
         this.book = book;
+    }
+
+    public LocalDateTime getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
     }
 }
