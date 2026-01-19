@@ -8,6 +8,8 @@ import ug.project.library.service.BookService;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class ReservationService {
     private static final Duration CONFIRMATION_TIME = Duration.ofHours(2);
 
     private final ReservationRepository reservationRepository;
-    private final ug.project.library.service.BookService bookService;
+    private final BookService bookService;
     private final UserService userService;
     private final AuthService authService;
     private final ReservationDao reservationDao;
@@ -46,10 +48,20 @@ public class ReservationService {
         this.reservationDao = reservationDao;
     }
 
+
+    @Transactional(readOnly = true)
+    public List<ReservationDto> getAllReservations() {
+        return reservationRepository.findAll().stream()
+                .map(this::mapReservationToDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Transactional
     public Reservation getReservationByIdAndUserId(Long reservationId, Long userId) {
         return reservationRepository.findByIdAndUserId(reservationId, userId).orElseThrow(() -> new IllegalArgumentException());
         
     }
+
 
     private ReservationDto mapReservationToDto(Reservation reservation) {
         return new ReservationDto(
@@ -77,6 +89,10 @@ public class ReservationService {
 
 
     // }
+    @Transactional
+    public Page<Reservation> getUserReservationHistory(Long userId, Pageable pageable){
+        return reservationRepository.findPastReservations(userId, pageable);
+    }
 
     @Transactional
     public List<Reservation> getUserActiveReservations(Long userId){

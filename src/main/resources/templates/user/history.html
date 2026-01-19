@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia rezerwacji - Biblioteka</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Historia rezerwacji</h1>
+
+        <div th:if="${historyPage.content.isEmpty()}" class="alert alert-info">
+            Nie masz jeszcze żadnych zakończonych rezerwacji.
+        </div>
+
+        <div th:unless="${historyPage.content.isEmpty()}">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tytuł książki</th>
+                            <th>Data rezerwacji</th>
+                            <th>Status</th>
+                            <th>Termin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="reservation : ${historyPage.content}">
+                            <td>
+                                <a th:href="@{/books/{id}(id=${reservation.book.id})}" 
+                                   th:text="${reservation.book.title}"
+                                   class="text-decoration-none"></a>
+                            </td>
+                            <td th:text="${#temporals.format(reservation.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${
+                                          reservation.status.name() == 'ZWRÓCONA' ? 'bg-success' :
+                                          reservation.status.name() == 'ANULOWANA' ? 'bg-secondary' :
+                                          'bg-warning'
+                                      }"
+                                      th:text="${reservation.status}"></span>
+                            </td>
+                            <td th:text="${reservation.deadline != null ? #temporals.format(reservation.deadline, 'dd-MM-yyyy HH:mm') : '-'}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginacja -->
+            <nav th:if="${historyPage.totalPages > 1}" aria-label="Nawigacja strony">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${historyPage.first} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/user/history(page=${currentPage - 1})}" 
+                           aria-label="Poprzednia">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, historyPage.totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" 
+                           th:href="@{/user/history(page=${i})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${historyPage.last} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/user/history(page=${currentPage + 1})}" 
+                           aria-label="Następna">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="mt-4">
+            <a href="/user/my-reservations" class="btn btn-secondary">Aktywne rezerwacje</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

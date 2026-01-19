@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Reservations - Library</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style th:replace="~{fragments/navbar :: navbar-styles}"></style>
+</head>
+<body class="bg-light">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Zarządzanie Rezerwacjami</h2>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Użytkownik</th>
+                                <th>Książka</th>
+                                <th>Data utworzenia</th>
+                                <th>Termin</th>
+                                <th>Status</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="res : ${reservations}">
+                                <td th:text="${res.id}">1</td>
+                                <td th:text="${res.username}">User</td>
+                                <td th:text="${res.bookTitle}">Title</td>
+                                <td th:text="${#temporals.format(res.createdAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                <td th:text="${#temporals.format(res.deadline, 'yyyy-MM-dd HH:mm')}">Deadline</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${res.status == 'OCZEKUJĄCA' ? 'bg-warning text-dark' : 
+                                                           (res.status == 'POTWIERDZONA' ? 'bg-info text-dark' : 
+                                                           (res.status == 'WYPOŻYCZONA' ? 'bg-primary' : 
+                                                           (res.status == 'ZWRÓCONA' ? 'bg-success' : 'bg-secondary')))}"
+                                          th:text="${res.status}">Status</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <form th:if="${res.status == 'OCZEKUJĄCA'}" 
+                                              th:action="@{/reservation/{id}/confirm(id=${res.id}, source='admin')}" method="post">
+                                            <button type="submit" class="btn btn-outline-info">Potwierdź</button>
+                                        </form>
+                                        <form th:if="${res.status == 'POTWIERDZONA'}" 
+                                              th:action="@{/reservation/{id}/borrow(id=${res.id}, source='admin')}" method="post">
+                                            <button type="submit" class="btn btn-outline-primary">Wypożycz</button>
+                                        </form>
+                                        <form th:if="${res.status == 'WYPOŻYCZONA'}" 
+                                              th:action="@{/reservation/{id}/return(id=${res.id}, source='admin')}" method="post">
+                                            <button type="submit" class="btn btn-outline-success">Zwróć</button>
+                                        </form>
+                                        <form th:if="${res.status == 'OCZEKUJĄCA' || res.status == 'POTWIERDZONA'}" 
+                                              th:action="@{/reservation/{id}/cancel(id=${res.id}, source='admin')}" method="post">
+                                            <button type="submit" class="btn btn-outline-danger ms-1">Anuluj</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(reservations)}">
+                                <td colspan="7" class="text-center text-muted">Brak rezerwacji</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,14 +1,27 @@
 package ug.project.library.dto;
 
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.*;
+
 
 public class RatingDto {
     private Long id;
+
+    @NotNull(message = "Id użytkownika jest wymagane")
     private Long userId;
+
     private String username;
+
+    @NotNull(message = "Id książki jest wymagane")
     private Long bookId;
+
     private String bookTitle;
+
+    @NotNull(message = "Ocena jest wymagana")
+    @Min(value = 0, message = "Ocena nie może być mniejsza niż 0")
+    @Max(value = 10, message = "Ocena nie może być większa niż 10")
     private Integer score;
+
     private LocalDateTime createdAt;
     private LocalDateTime lastModifiedAt;
 

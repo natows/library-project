@@ -1,5 +1,7 @@
 package ug.project.library.web;
 
+import org.springframework.validation.BindingResult;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,20 +27,27 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        model.addAttribute("user", new UserRegistrationDto());
+        if (!model.containsAttribute("user")) {
+            model.addAttribute("user", new UserRegistrationDto());
+        }
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") UserRegistrationDto userDto, 
+    public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDto userDto, 
+                              BindingResult bindingResult,
                               RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "register";
+        }
+
         try {
             authService.registerUser(userDto);
             redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/register";
+            bindingResult.rejectValue("username", "error.user", e.getMessage());
+            return "register";
         }
     }
 

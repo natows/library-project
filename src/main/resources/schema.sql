@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS genres (
 CREATE TABLE IF NOT EXISTS books (
     id BIGSERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    rating DOUBLE PRECISION,
+    avg_rating DOUBLE PRECISION,
     year_published INT,
     publisher VARCHAR(255) NOT NULL,
     cover_image_url VARCHAR(512),
@@ -45,6 +45,26 @@ CREATE TABLE IF NOT EXISTS reservations (
     id BIGSERIAL PRIMARY KEY,
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL,
+    deadline TIMESTAMP,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    book_id BIGINT NOT NULL REFERENCES books(id)
+);
+
+CREATE TABLE IF NOT EXISTS ratings (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    book_id BIGINT NOT NULL REFERENCES books(id),
+    score INT NOT NULL CHECK (score >= 1 AND score <= 5),
+    created_at TIMESTAMP NOT NULL,
+    last_modified_at TIMESTAMP,
+    CONSTRAINT unique_user_book_rating UNIQUE (user_id, book_id)
+);
+ 
+CREATE TABLE IF NOT EXISTS comments (
+    id BIGSERIAL PRIMARY KEY,
+    content VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    last_modified_at TIMESTAMP,
     user_id BIGINT NOT NULL REFERENCES users(id),
     book_id BIGINT NOT NULL REFERENCES books(id)
 );

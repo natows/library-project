@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statystyki - Biblioteka</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style th:replace="~{fragments/navbar :: navbar-styles}"></style>
+    <style>
+        .stats-panel {
+            height: 600px;
+            overflow-y: auto;
+        }
+        .stats-table {
+            font-size: 0.9rem;
+        }
+        .rank-badge {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .rank-1 { background: gold; color: #000; }
+        .rank-2 { background: silver; color: #000; }
+        .rank-3 { background: #cd7f32; color: #fff; }
+        .rank-default { background: #e9ecef; color: #495057; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container-fluid mt-4">
+        <h1 class="mb-4 text-center">
+            <i class="bi bi-graph-up"></i> Panel Statystyk
+        </h1>
+
+        <div class="row g-3">
+            <!-- Najpopularniejsze książki -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-book-fill"></i> Najpopularniejsze książki
+                        </h5>
+                    </div>
+                    <div class="card-body stats-panel p-0">
+                        <table class="table table-hover stats-table mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Tytuł</th>
+                                    <th style="width: 80px;" class="text-center">Wypożyczenia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="book, iterStat : ${books.content}">
+                                    <td class="text-center">
+                                        <span class="rank-badge"
+                                              th:classappend="${iterStat.index == 0} ? 'rank-1' : (${iterStat.index == 1} ? 'rank-2' : (${iterStat.index == 2} ? 'rank-3' : 'rank-default'))"
+                                              th:text="${iterStat.index + 1}">1</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${book.title}">Tytuł książki</div>
+                                        <small class="text-muted" th:text="${book.publisher}">Wydawnictwo</small>
+                                        <div th:if="${book.avgRating != null}" class="text-warning">
+                                            <i class="bi bi-star-fill"></i>
+                                            <small th:text="${#numbers.formatDecimal(book.avgRating, 1, 1)}">4.5</small>
+                                        </div>
+                                    </td>
+            
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-center" th:if="${books.totalPages > 1}">
+                        <nav>
+                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                                <li class="page-item" th:classappend="${books.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/stats(booksPage=${booksPage - 1}, authorsPage=${authorsPage}, usersPage=${usersPage})}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link" th:text="${booksPage + 1} + ' / ' + ${books.totalPages}">1 / 5</span>
+                                </li>
+                                <li class="page-item" th:classappend="${books.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/stats(booksPage=${booksPage + 1}, authorsPage=${authorsPage}, usersPage=${usersPage})}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Najczęściej czytani autorzy -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-fill"></i> Najpopularniejsi autorzy
+                        </h5>
+                    </div>
+                    <div class="card-body stats-panel p-0">
+                        <table class="table table-hover stats-table mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Autor</th>
+                                    <th style="width: 80px;" class="text-center">Czytelnicy</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="author, iterStat : ${authors.content}">
+                                    <td class="text-center">
+                                        <span class="rank-badge"
+                                              th:classappend="${iterStat.index == 0} ? 'rank-1' : (${iterStat.index == 1} ? 'rank-2' : (${iterStat.index == 2} ? 'rank-3' : 'rank-default'))"
+                                              th:text="${iterStat.index + 1}">1</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${author.fullName}">Imię Nazwisko</div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-book"></i>
+                                            <span th:text="${author.books.size()}">0</span> książek
+                                        </small>
+                                    </td>
+                    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-center" th:if="${authors.totalPages > 1}">
+                        <nav>
+                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                                <li class="page-item" th:classappend="${authors.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/stats(booksPage=${booksPage}, authorsPage=${authorsPage - 1}, usersPage=${usersPage})}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link" th:text="${authorsPage + 1} + ' / ' + ${authors.totalPages}">1 / 5</span>
+                                </li>
+                                <li class="page-item" th:classappend="${authors.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/stats(booksPage=${booksPage}, authorsPage=${authorsPage + 1}, usersPage=${usersPage})}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Najaktywniejsi użytkownicy -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-people-fill"></i> Najaktywniejsi użytkownicy
+                        </h5>
+                    </div>
+                    <div class="card-body stats-panel p-0">
+                        <table class="table table-hover stats-table mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Użytkownik</th>
+                                    <th style="width: 80px;" class="text-center">Wypożyczenia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="user, iterStat : ${users.content}">
+                                    <td class="text-center">
+                                        <span class="rank-badge"
+                                              th:classappend="${iterStat.index == 0} ? 'rank-1' : (${iterStat.index == 1} ? 'rank-2' : (${iterStat.index == 2} ? 'rank-3' : 'rank-default'))"
+                                              th:text="${iterStat.index + 1}">1</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${user.username}">username</div>
+                                        <small class="text-muted" th:text="${user.email}">email@example.com</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-center" th:if="${users.totalPages > 1}">
+                        <nav>
+                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                                <li class="page-item" th:classappend="${users.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/stats(booksPage=${booksPage}, authorsPage=${authorsPage}, usersPage=${usersPage - 1})}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link" th:text="${usersPage + 1} + ' / ' + ${users.totalPages}">1 / 5</span>
+                                </li>
+                                <li class="page-item" th:classappend="${users.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/stats(booksPage=${booksPage}, authorsPage=${authorsPage}, usersPage=${usersPage + 1})}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

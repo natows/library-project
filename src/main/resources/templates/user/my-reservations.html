@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moje Rezerwacje - Biblioteka</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style th:replace="~{fragments/navbar :: navbar-styles}"></style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="bi bi-bookmark-check"></i> Moje Rezerwacje
+                </h1>
+
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${reservations.isEmpty()}" class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Nie masz aktywnych rezerwacji.
+                    <a th:href="@{/}" class="alert-link ms-2">Przeglądaj katalog</a>
+                </div>
+
+                <div th:unless="${reservations.isEmpty()}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div th:each="reservation : ${reservations}" class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header" th:classappend="${reservation.status.name() == 'OCZEKUJĄCA' ? 'bg-warning text-dark' : 
+                                                                      reservation.status.name() == 'POTWIERDZONA' ? 'bg-info text-white' : 
+                                                                      'bg-success text-white'}">
+                                <h5 class="mb-0">
+                                    <i class="bi" th:classappend="${reservation.status.name() == 'OCZEKUJĄCA' ? 'bi-hourglass-split' : 
+                                                                   reservation.status.name() == 'POTWIERDZONA' ? 'bi-check-circle' : 
+                                                                   'bi-book'}"></i>
+                                    <span th:text="${reservation.status}"></span>
+                                </h5>
+                            </div>
+                            
+                            <img th:src="${reservation.book.coverImageUrl}" 
+                                 th:alt="${reservation.book.title}"
+                                 class="card-img-top"
+                                 style="height: 300px; object-fit: cover;"
+                                 onerror="this.src='https://via.placeholder.com/300x400?text=No+Cover'">
+                            
+                            <div class="card-body">
+                                <h6 class="card-title text-primary" th:text="${reservation.book.title}">Tytuł książki</h6>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="bi bi-building"></i> 
+                                    <span th:text="${reservation.book.publisher}">Wydawnictwo</span>
+                                </p>
+                                
+                                <hr>
+                                
+                                <p class="mb-1">
+                                    <i class="bi bi-calendar-event"></i> 
+                                    <strong>Data rezerwacji:</strong><br>
+                                    <small th:text="${#temporals.format(reservation.createdAt, 'dd-MM-yyyy HH:mm')}"></small>
+                                </p>
+                                
+                                <p class="mb-1" th:if="${reservation.status.name() == 'OCZEKUJĄCA' and reservation.deadline != null}">
+                                    <i class="bi bi-clock"></i> 
+                                    <strong>Potwierdź do:</strong><br>
+                                    <small class="text-danger fw-bold" th:text="${#temporals.format(reservation.deadline, 'dd-MM-yyyy HH:mm')}"></small>
+                                </p>
+
+                                <p class="mb-1" th:if="${reservation.status.name() == 'WYPOŻYCZONA' and reservation.deadline != null}">
+                                    <i class="bi bi-calendar-x"></i> 
+                                    <strong>Zwróć do:</strong><br>
+                                    <small class="text-warning fw-bold" th:text="${#temporals.format(reservation.deadline, 'dd-MM-yyyy HH:mm')}"></small>
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <!-- Confirm button -->
+                                <form th:if="${reservation.status.name() == 'OCZEKUJĄCA'}" 
+                                      th:action="@{/reservation/{id}/confirm(id=${reservation.id})}" 
+                                      method="post" 
+                                      class="d-inline w-100">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
+                                        <i class="bi bi-check-circle"></i> Potwierdź
+                                    </button>
+                                </form>
+
+                                <!-- Borrow button -->
+                                <form th:if="${reservation.status.name() == 'POTWIERDZONA'}" 
+                                      th:action="@{/reservation/{id}/borrow(id=${reservation.id})}" 
+                                      method="post" 
+                                      class="d-inline w-100">
+                                    <button type="submit" class="btn btn-sm btn-success w-100 mb-2">
+                                        <i class="bi bi-book"></i> Wypożycz
+                                    </button>
+                                </form>
+
+                                <!-- Return button -->
+                                <form th:if="${reservation.status.name() == 'WYPOŻYCZONA'}" 
+                                      th:action="@{/reservation/{id}/return(id=${reservation.id})}" 
+                                      method="post" 
+                                      class="d-inline w-100">
+                                    <button type="submit" class="btn btn-sm btn-info w-100 mb-2">
+                                        <i class="bi bi-arrow-return-left"></i> Zwróć
+                                    </button>
+                                </form>
+
+                                <!-- Cancel button -->
+                                <form th:if="${reservation.status.name() == 'OCZEKUJĄCA' or reservation.status.name() == 'POTWIERDZONA'}" 
+                                      th:action="@{/reservation/{id}/cancel(id=${reservation.id})}" 
+                                      method="post"
+                                      class="d-inline w-100"
+                                      onsubmit="return confirm('Czy na pewno chcesz anulować tę rezerwację?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                        <i class="bi bi-x-circle"></i> Anuluj
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

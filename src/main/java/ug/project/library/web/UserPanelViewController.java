@@ -2,11 +2,15 @@ package ug.project.library.web;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import ug.project.library.service.AuthService;
 import ug.project.library.service.ReservationService;
@@ -35,4 +39,16 @@ public class UserPanelViewController {
         model.addAttribute("reservations", activeReservations);
         return "user/my-reservations";
     }
+
+    @GetMapping("/history")
+    public String reservationHistory(Model model, @RequestParam(defaultValue = "0") int page) {
+        Long userId = authService.getCurrentUserId();
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Reservation> historyPage = reservationService.getUserReservationHistory(userId, pageable);
+        
+        model.addAttribute("historyPage", historyPage);
+        model.addAttribute("currentPage", page);
+        return "user/history";
+    }
+
 }

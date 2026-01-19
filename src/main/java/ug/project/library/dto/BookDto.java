@@ -4,16 +4,38 @@ import ug.project.library.model.entity.Author;
 import ug.project.library.model.entity.Genre;
 
 import java.util.List;
+import jakarta.validation.constraints.*;
+
+import ug.project.library.dto.AuthorDto;
+import ug.project.library.dto.GenreDto;
 
 public class BookDto {
     private Long id;
+    @NotBlank(message = "Tytuł książki nie może być pusty")
+    @Size(max = 200, message = "Tytuł książki nie może być dłuższy niż 200 znaków")
     private String title;
-    private List<Author> authors;
-    private List<Genre> genres;
+
+    @NotEmpty(message = "Lista autorów nie może być pusta")
+    private List<AuthorDto> authors;
+
+    @NotEmpty(message = "Lista gatunków nie może być pusta")
+    private List<GenreDto> genres;
+
+    @DecimalMin(value = "0.0", message = "Średnia ocena nie może być mniejsza niż 0")
+    @DecimalMax(value = "10.0", message = "Średnia ocena nie może być większa niż 10")
     private Double avgRating;
+
+    @Min(value = 1, message = "Rok wydania musi być większy od 0")
     private int yearPublished;
+
+    @NotBlank(message = "Wydawnictwo nie może być puste")
+    @Size(max = 100, message = "Nazwa wydawnictwa nie może być dłuższa niż 100 znaków")
     private String publisher;
+
+    @Size(max = 500, message = "URL okładki nie może być dłuższy niż 500 znaków")
     private String coverImageUrl;
+
+    @Min(value = 0, message = "Dostępna ilość egzemplarzy nie może być ujemna")
     private int quantityAvailable;
 
 
@@ -21,7 +43,7 @@ public class BookDto {
 
     }
 
-    public BookDto(Long id, String title, List<Author> authors, List<Genre> genres, Double avgRating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable) {
+    public BookDto(Long id, String title, List<AuthorDto> authors, List<GenreDto> genres, Double avgRating, int yearPublished, String publisher, String coverImageUrl, int quantityAvailable) {
         this.id = id;
         this.title = title;
         this.authors = authors;
@@ -47,19 +69,19 @@ public class BookDto {
         this.title = title;
     }
 
-    public List<Author> getAuthors() {
+    public List<AuthorDto> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(List<Author> authors) {
+    public void setAuthors(List<AuthorDto> authors) {
         this.authors = authors;
     }
 
-    public List<Genre> getGenres() {
+    public List<GenreDto> getGenres() {
         return genres;
     }
 
-    public void setGenres(List<Genre> genres) {
+    public void setGenres(List<GenreDto> genres) {
         this.genres = genres;
     }
 

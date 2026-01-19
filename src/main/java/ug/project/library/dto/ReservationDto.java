@@ -2,16 +2,23 @@ package ug.project.library.dto;
 
 import java.time.LocalDateTime;
 import ug.project.library.model.enumerate.ReservationStatus;
+import jakarta.validation.constraints.*;
+
 
 public class ReservationDto {
     private Long id;
+    @NotNull(message = "Status rezerwacji jest wymagany")
     private ReservationStatus status;
+
     private LocalDateTime createdAt;
     private LocalDateTime deadline;
-    
+
+    @NotNull(message = "Id użytkownika jest wymagane")
     private Long userId;
+
     private String userName;
-    
+
+    @NotNull(message = "Id książki jest wymagane")
     private Long bookId;
     private String bookTitle;
 
