@@ -10,44 +10,27 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BookNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleBookNotFoundException(BookNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(),
-            ex.getMessage(),
-            LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    @ExceptionHandler({AuthorNotFoundException.class, BookNotFoundException.class,
+            CommentNotFoundException.class, GenreNotFoundException.class,
+            RatingNotFoundException.class, UserNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleNotFoundExceptions(RuntimeException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(),
-            ex.getMessage(),
-            LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    @ExceptionHandler({EmailAlreadyExistsException.class, UsernameAlreadyExistsException.class, BookAlreadyExistsException.class,
+    })
+    public ResponseEntity<ErrorResponse> handleConflictExceptions(RuntimeException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    @ExceptionHandler(BookNotAvailableException.class)
-    public ResponseEntity<ErrorResponse> handleBookNotAvailableException(BookNotAvailableException ex) {
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.CONFLICT.value(),
-            ex.getMessage(),
-            LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-    }
+
+
+
+
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.BAD_REQUEST.value(),
-            ex.getMessage(),
-            LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -58,6 +41,17 @@ public class GlobalExceptionHandler {
             LocalDateTime.now()
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(
+            HttpStatus status, String message) {
+
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                message,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, status);
     }
 
     public static class ErrorResponse {

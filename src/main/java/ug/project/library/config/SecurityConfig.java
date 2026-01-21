@@ -19,6 +19,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/books/**", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

@@ -5,7 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ug.project.library.dto.UserRegistrationDto;
+import ug.project.library.exceptions.EmailAlreadyExistsException;
 import ug.project.library.exceptions.UserNotFoundException;
+import ug.project.library.exceptions.UsernameAlreadyExistsException;
 import ug.project.library.model.entity.User;
 import ug.project.library.repository.UserRepository;
 import ug.project.library.model.enumerate.*;
@@ -50,19 +52,22 @@ public class AuthService {
 
     }
 
-    public User registerUser(UserRegistrationDto userRegistrationDto) {
+    private void verifyRegistrationData(UserRegistrationDto userRegistrationDto) {
         if (userRepository.findByUsername(userRegistrationDto.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new UsernameAlreadyExistsException(userRegistrationDto.getUsername());
         }
-        
+
         if (userRepository.findByEmail(userRegistrationDto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new EmailAlreadyExistsException(userRegistrationDto.getEmail());
         }
 
         if (userRegistrationDto.getPassword().length() < 6){
             throw new IllegalArgumentException("Password must be at least 6 characters");
         }
+    }
 
+    public User registerUser(UserRegistrationDto userRegistrationDto) {
+        verifyRegistrationData(userRegistrationDto);
         User user = new User(userRegistrationDto.getUsername(),
             passwordEncoder.encode(userRegistrationDto.getPassword()),
             userRegistrationDto.getEmail(),

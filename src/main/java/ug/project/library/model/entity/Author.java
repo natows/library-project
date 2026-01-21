@@ -3,7 +3,9 @@ package ug.project.library.model.entity;
 import jakarta.persistence.*;
 import java.util.List;
 @Entity
-@Table(name = "authors")
+@Table(name = "authors", uniqueConstraints = {
+@UniqueConstraint(columnNames = {"name", "surname"})
+    })
 public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

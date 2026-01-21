@@ -30,13 +30,13 @@
                     <tbody>
                         <tr th:each="reservation : ${historyPage.content}">
                             <td>
-                                <a th:href="@{/books/{id}(id=${reservation.book.id})}" 
+                                <a th:href="@{/books/{id}(id=${reservation.book.id})}"
                                    th:text="${reservation.book.title}"
                                    class="text-decoration-none"></a>
                             </td>
                             <td th:text="${#temporals.format(reservation.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
                             <td>
-                                <span class="badge" 
+                                <span class="badge"
                                       th:classappend="${
                                           reservation.status.name() == 'ZWRÓCONA' ? 'bg-success' :
                                           reservation.status.name() == 'ANULOWANA' ? 'bg-secondary' :
@@ -45,33 +45,37 @@
                                       th:text="${reservation.status}"></span>
                             </td>
                             <td th:text="${reservation.deadline != null ? #temporals.format(reservation.deadline, 'dd-MM-yyyy HH:mm') : '-'}"></td>
+                            <td>
+                                <a th:href="@{/rate/{bookId}(bookId=${reservation.book.id})}"
+                                   class="btn btn-primary btn-sm">Oceń książkę</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Paginacja -->
+
             <nav th:if="${historyPage.totalPages > 1}" aria-label="Nawigacja strony">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${historyPage.first} ? 'disabled'">
-                        <a class="page-link" 
-                           th:href="@{/user/history(page=${currentPage - 1})}" 
+                        <a class="page-link"
+                           th:href="@{/user/history(page=${currentPage - 1})}"
                            aria-label="Poprzednia">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
-                    
-                    <li class="page-item" 
+
+                    <li class="page-item"
                         th:each="i : ${#numbers.sequence(0, historyPage.totalPages - 1)}"
                         th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" 
+                        <a class="page-link"
                            th:href="@{/user/history(page=${i})}"
                            th:text="${i + 1}"></a>
                     </li>
-                    
+
                     <li class="page-item" th:classappend="${historyPage.last} ? 'disabled'">
-                        <a class="page-link" 
-                           th:href="@{/user/history(page=${currentPage + 1})}" 
+                        <a class="page-link"
+                           th:href="@{/user/history(page=${currentPage + 1})}"
                            aria-label="Następna">
                             <span aria-hidden="true">&raquo;</span>
                         </a>

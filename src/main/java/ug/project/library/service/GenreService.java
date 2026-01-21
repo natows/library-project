@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ug.project.library.dto.GenreDto;
+import ug.project.library.exceptions.GenreNotFoundException;
 import ug.project.library.model.entity.Genre;
 import ug.project.library.repository.GenreRepository;
 
@@ -25,7 +26,7 @@ public class GenreService {
     @Transactional(readOnly = true)
     public GenreDto getGenreById(Long id) {
         Genre genre = genreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Genre not found"));
+                .orElseThrow(() -> new GenreNotFoundException(id));
         return mapToDto(genre);
     }
 
@@ -39,7 +40,7 @@ public class GenreService {
     @Transactional
     public GenreDto updateGenre(Long id, GenreDto genreDto) {
         Genre genre = genreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Genre not found"));
+                .orElseThrow(() -> new GenreNotFoundException(id));
         genre.setName(genreDto.getName());
         return mapToDto(genreRepository.save(genre));
     }
@@ -47,11 +48,12 @@ public class GenreService {
     @Transactional
     public void deleteGenre(Long id) {
         if (!genreRepository.existsById(id)) {
-            throw new RuntimeException("Genre not found");
+            throw new GenreNotFoundException(id);
         }
         genreRepository.deleteById(id);
     }
 
+    @Transactional
     public Genre findOrCreateGenre(String name) {
         return genreRepository
             .findByName(name)

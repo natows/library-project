@@ -33,6 +33,7 @@ import ug.project.library.dto.*;
 public class ReservationService {
     //to gdzies przeniesc w logiczniejsze miejsce(ale nie enum!!)
     private static final Duration CONFIRMATION_TIME = Duration.ofHours(2);
+    private static final Duration LOAN_TIME = Duration.ofHours(336);
 
     private final ReservationRepository reservationRepository;
     private final BookService bookService;

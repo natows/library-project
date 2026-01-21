@@ -3,6 +3,7 @@ package ug.project.library.service;
 import org.springframework.stereotype.Service;
 
 import ug.project.library.dto.AuthorDto;
+import ug.project.library.exceptions.AuthorNotFoundException;
 import ug.project.library.exceptions.BookNotFoundException;
 import ug.project.library.model.entity.Author;
 import ug.project.library.model.entity.Author;
@@ -53,6 +54,7 @@ public class AuthorService {
     
 
 
+    @Transactional
     public Author findOrCreateAuthor(String name, String surname) {
         return authorRepository
             .findByNameAndSurname(name, surname)
@@ -67,7 +69,7 @@ public class AuthorService {
 
     @Transactional(readOnly = true)
     public AuthorDto getAuthorDtoById(Long id){
-        Author author = authorRepository.findById(id).orElseThrow(() -> new RuntimeException("Author not found"));
+        Author author = authorRepository.findById(id).orElseThrow(() -> new AuthorNotFoundException(id));
         return mapAuthorToDto(author);
     }
 
@@ -80,7 +82,7 @@ public class AuthorService {
 
     @Transactional
     public AuthorDto updateAuthor(Long id, AuthorDto authorDto){
-        Author author = authorRepository.findById(id).orElseThrow(() -> new RuntimeException("Author not found"));
+        Author author = authorRepository.findById(id).orElseThrow(() -> new AuthorNotFoundException(id));
 
         author.setName(authorDto.getName());
         author.setSurname(authorDto.getSurname());
@@ -90,7 +92,7 @@ public class AuthorService {
     @Transactional
     public void deleteAuthor(Long id){
         if (!authorRepository.existsById(id)) {
-            throw new IllegalAccessError("ksiazka nie znaleziona");
+            throw new AuthorNotFoundException(id);
         }
         authorRepository.deleteById(id);
         

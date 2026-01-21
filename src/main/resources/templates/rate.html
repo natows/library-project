@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Oceń książkę</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Gwiazdki */
+        .star-rating input { display: none; }
+        .star-rating label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: gold;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Oceń książkę</h2>
+
+    <!-- Komunikaty sukcesu/błędu -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Formularz -->
+    <form th:action="@{/rate/{bookId}(bookId=${bookId})}" th:object="${ratingDto}" method="post">
+
+        <!-- Globalne błędy -->
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+        </div>
+
+        <div class="mb-3 star-rating">
+            <span>Twoja ocena:</span><br>
+            <input type="radio" th:field="*{score}" id="star5" value="5"/>
+            <label for="star5">★</label>
+
+            <input type="radio" th:field="*{score}" id="star4" value="4"/>
+            <label for="star4">★</label>
+
+            <input type="radio" th:field="*{score}" id="star3" value="3"/>
+            <label for="star3">★</label>
+
+            <input type="radio" th:field="*{score}" id="star2" value="2"/>
+            <label for="star2">★</label>
+
+            <input type="radio" th:field="*{score}" id="star1" value="1"/>
+            <label for="star1">★</label>
+
+            <!-- Walidacja pola -->
+            <div class="text-danger" th:errors="*{score}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Dodaj ocenę</button>
+        <a th:href="@{/books/{id}(id=${bookId})}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+</body>
+</html>

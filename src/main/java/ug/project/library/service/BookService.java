@@ -1,5 +1,6 @@
 package ug.project.library.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -100,18 +101,20 @@ public class BookService {
     public BookDto updateBook(Long id, BookDto bookDto) {
         Book book = getBookById(id);
 
-        List<Author> authors = bookDto.getAuthors().stream()
-        .map(a -> authorService.findOrCreateAuthor(a.getName(), a.getSurname()))
-        .toList();
+        List<Author> authors = bookDto.getAuthors() != null ? bookDto.getAuthors().stream()
+            .map(a -> authorService.findOrCreateAuthor(a.getName(), a.getSurname()))
+            .toList() : new ArrayList<>();
     
-        List<Genre> genres = bookDto.getGenres().stream()
+        List<Genre> genres = bookDto.getGenres() != null ? bookDto.getGenres().stream()
             .map(g -> genreService.findOrCreateGenre(g.getName()))
-            .toList();
+            .toList() : new ArrayList<>();
         
         book.setTitle(bookDto.getTitle());
         book.setAuthors(authors);
         book.setGenres(genres);
-        book.setAvgRating(bookDto.getAvgRating());
+        if (bookDto.getAvgRating() != null) {
+            book.setAvgRating(bookDto.getAvgRating());
+        }
         book.setYearPublished(bookDto.getYearPublished());
         book.setPublisher(bookDto.getPublisher());
         book.setCoverImageUrl(bookDto.getCoverImageUrl());
@@ -131,18 +134,21 @@ public class BookService {
 
 
     private Book mapDtoToBook(BookDto bookDto){
-        List<Author> authors = bookDto.getAuthors().stream()
-        .map(a -> authorService.findOrCreateAuthor(a.getName(), a.getSurname()))
-        .toList();
-        List<Genre> genres = bookDto.getGenres().stream()
-        .map(a -> genreService.findOrCreateGenre(a.getName()))
-        .toList();
+        List<Author> authors = bookDto.getAuthors() != null ? bookDto.getAuthors().stream()
+            .map(a -> authorService.findOrCreateAuthor(a.getName(), a.getSurname()))
+            .toList() : new ArrayList<>();
+            
+        List<Genre> genres = bookDto.getGenres() != null ? bookDto.getGenres().stream()
+            .map(a -> genreService.findOrCreateGenre(a.getName()))
+            .toList() : new ArrayList<>();
 
         Book book = new Book();
         book.setTitle(bookDto.getTitle());
         book.setAuthors(authors);
         book.setGenres(genres);
-        book.setAvgRating(bookDto.getAvgRating()); 
+        if (bookDto.getAvgRating() != null) {
+            book.setAvgRating(bookDto.getAvgRating()); 
+        }
         book.setYearPublished(bookDto.getYearPublished());
         book.setPublisher(bookDto.getPublisher());
         book.setCoverImageUrl(bookDto.getCoverImageUrl());

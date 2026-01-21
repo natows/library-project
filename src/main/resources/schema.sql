@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS authors (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255),
     surname VARCHAR(255),
-    full_name VARCHAR(511)
+    full_name VARCHAR(511),
+    CONSTRAINT unique_author UNIQUE (name, surname)
 );
 
 CREATE TABLE IF NOT EXISTS genres (

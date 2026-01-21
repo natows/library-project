@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ug.project.library.dto.RatingDto;
+import ug.project.library.exceptions.RatingNotFoundException;
 import ug.project.library.model.entity.Book;
 import ug.project.library.model.entity.Rating;
 import ug.project.library.model.entity.User;
@@ -46,9 +47,14 @@ public class RatingService {
     }
 
     @Transactional(readOnly = true)
+    public Page<RatingDto> getAllRatingsForBook(Long bookId, Pageable pageable) {
+        return ratingRepository.findByBookId(bookId, pageable).map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
     public RatingDto getRatingDtoById(Long id) {
         Rating rating = ratingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rating not found"));
+                .orElseThrow(() -> new RatingNotFoundException(id));
         return mapToDto(rating);
     }
 
@@ -60,7 +66,7 @@ public class RatingService {
         LocalDateTime weekAgoDate = LocalDateTime.now().minus(RATING_COOLDOWN_DAYS, ChronoUnit.DAYS);
         List<Rating> recentRatings = ratingRepository.findRecentRatingsByUser(userId, weekAgoDate);
         if (!recentRatings.isEmpty()) {
-            throw new IllegalStateException("Mozesz dodac ocene tylko raz na tydzien");
+            throw new IllegalStateException("Możesz ocenić tylko jedną książkę na tydzień");
         }
     }
 
@@ -77,9 +83,11 @@ public class RatingService {
     }
 
     public RatingDto addRating(RatingDto ratingDto){
-        User user = userRepository.findById(ratingDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = authService.getCurrentUser();
         Book book = bookService.getBookById(ratingDto.getBookId());
+
+        ratingRepository.findByUserIdAndBookId(user.getId(), book.getId())
+                .ifPresent(r -> { throw new IllegalStateException("Już oceniłeś tę książkę. Możesz ją edytować."); });
 
         checkIfUserLoanedBook(book.getId(), user.getId());
         validateScoreValue(ratingDto.getScore());
@@ -112,8 +120,13 @@ public class RatingService {
     public RatingDto updateRating(Long ratingId, RatingDto ratingDto){
         validateScoreValue(ratingDto.getScore());
         Rating rating = ratingRepository.findById(ratingId)
-                .orElseThrow(() -> new IllegalArgumentException("Rating not found"));
+                .orElseThrow(() -> new RatingNotFoundException(ratingId));
         
+        User currentUser = authService.getCurrentUser();
+        if (!rating.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalStateException("Nie możesz edytować cudzej oceny");
+        }
+
         checkEditCooldown(rating);
 
         rating.setScore(ratingDto.getScore());
@@ -128,7 +141,13 @@ public class RatingService {
     @Transactional
     public void deleteRating(Long id) {
         Rating rating = ratingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rating not found"));
+                .orElseThrow(() -> new RatingNotFoundException(id));
+        
+        User currentUser = authService.getCurrentUser();
+        if (!rating.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalStateException("Nie możesz usunąć cudzej oceny");
+        }
+
         Long bookId = rating.getBook().getId();
         ratingRepository.deleteById(id);
         updateBookAverageRating(bookId);

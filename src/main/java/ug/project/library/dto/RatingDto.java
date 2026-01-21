@@ -7,7 +7,6 @@ import jakarta.validation.constraints.*;
 public class RatingDto {
     private Long id;
 
-    @NotNull(message = "Id użytkownika jest wymagane")
     private Long userId;
 
     private String username;
@@ -18,8 +17,8 @@ public class RatingDto {
     private String bookTitle;
 
     @NotNull(message = "Ocena jest wymagana")
-    @Min(value = 0, message = "Ocena nie może być mniejsza niż 0")
-    @Max(value = 10, message = "Ocena nie może być większa niż 10")
+    @Min(value = 1, message = "Ocena nie może być mniejsza niż 1")
+    @Max(value = 5, message = "Ocena nie może być większa niż 5")
     private Integer score;
 
     private LocalDateTime createdAt;

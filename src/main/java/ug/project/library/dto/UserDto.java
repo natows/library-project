@@ -1,12 +1,26 @@
 package ug.project.library.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import ug.project.library.model.enumerate.UserRole;
 
 public class UserDto {
     private Long id;
+
+    @NotBlank(message = "Username cannot be empty")
+    @Size(max = 50, message = "Username cannot be longer than 50 characters")
     private String username;
+
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Invalid email address")
+    @Size(max = 100, message = "Email cannot be longer than 100 characters")
     private String email;
+
     private UserRole userRole;
+
+    @Size(min = 6, message = "Password must be at least 6 characters long")
+    private String password;
 
     public UserDto() {
     }
@@ -48,5 +62,13 @@ public class UserDto {
 
     public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

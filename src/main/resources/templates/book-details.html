@@ -223,7 +223,7 @@
                         <div class="book-rating">
                             <span th:if="${book.avgRating != null}" th:text="${#numbers.formatDecimal(book.avgRating, 1, 1)} + ' ★'">4.5 ★</span>
                             <span th:if="${book.avgRating == null}" style="color: #999;">No ratings yet</span>
-                        </div>
+                            <a th:href="@{/reviews}" th:text="${numRatings} "></a>                        </div>
                     </div>
 
                     <div class="meta-item">
