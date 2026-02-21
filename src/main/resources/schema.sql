@@ -1,4 +1,5 @@
-CREATE TABLE IF NOT EXISTS authors (
+DROP TABLE IF EXISTS authors CASCADE;
+CREATE TABLE authors (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255),
     surname VARCHAR(255),
@@ -6,14 +7,16 @@ CREATE TABLE IF NOT EXISTS authors (
     CONSTRAINT unique_author UNIQUE (name, surname)
 );
 
-CREATE TABLE IF NOT EXISTS genres (
+DROP TABLE IF EXISTS genres CASCADE;
+CREATE TABLE genres (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS books (
+DROP TABLE IF EXISTS books CASCADE;
+CREATE TABLE books (
     id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(255) UNIQUE NOT NULL,
     avg_rating DOUBLE PRECISION,
     year_published INT,
     publisher VARCHAR(255) NOT NULL,
@@ -21,20 +24,23 @@ CREATE TABLE IF NOT EXISTS books (
     quantity_available INT
 );
 
-CREATE TABLE IF NOT EXISTS book_author (
+DROP TABLE IF EXISTS book_author CASCADE;
+CREATE TABLE book_author (
     book_id BIGINT REFERENCES books(id),
     author_id BIGINT REFERENCES authors(id),
     PRIMARY KEY (book_id, author_id)
 );
 
-CREATE TABLE IF NOT EXISTS book_genre (
+DROP TABLE IF EXISTS book_genre CASCADE;
+CREATE TABLE book_genre (
     book_id BIGINT REFERENCES books(id),
     genre_id BIGINT REFERENCES genres(id),
     PRIMARY KEY (book_id, genre_id)
 );
 
 
-CREATE TABLE IF NOT EXISTS users (
+DROP TABLE IF EXISTS users CASCADE;
+CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     encrypted_password VARCHAR(255) NOT NULL,
@@ -42,7 +48,8 @@ CREATE TABLE IF NOT EXISTS users (
     user_role VARCHAR(20) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS reservations (
+DROP TABLE IF EXISTS reservations CASCADE;
+CREATE TABLE reservations (
     id BIGSERIAL PRIMARY KEY,
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL,
@@ -51,7 +58,8 @@ CREATE TABLE IF NOT EXISTS reservations (
     book_id BIGINT NOT NULL REFERENCES books(id)
 );
 
-CREATE TABLE IF NOT EXISTS ratings (
+DROP TABLE IF EXISTS ratings CASCADE;
+CREATE TABLE ratings (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id),
     book_id BIGINT NOT NULL REFERENCES books(id),
@@ -61,7 +69,8 @@ CREATE TABLE IF NOT EXISTS ratings (
     CONSTRAINT unique_user_book_rating UNIQUE (user_id, book_id)
 );
  
-CREATE TABLE IF NOT EXISTS comments (
+DROP TABLE IF EXISTS comments CASCADE;
+CREATE TABLE comments (
     id BIGSERIAL PRIMARY KEY,
     content VARCHAR(1000) NOT NULL,
     created_at TIMESTAMP NOT NULL,
