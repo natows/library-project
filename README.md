@@ -2,7 +2,7 @@
 
 A full-stack web application for managing a library's collection, authors, and reservations. This project is built using modern Java technologies and follows a layered architecture to ensure maintainability and scalability.
 
-## 🚀 Key Features
+##  Key Features
 
 - **Book Management:** Create, read, update, and delete books in the library's catalog.
 - **Author Profiles:** Manage author information and their associated works.
@@ -12,7 +12,7 @@ A full-stack web application for managing a library's collection, authors, and r
 - **Secure Access:** Role-based security ensuring only authorized users can access sensitive administrative features.
 - **Interactive API Documentation:** Full OpenAPI/Swagger UI integration for exploring and testing REST endpoints.
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 ### Backend
 - **Java 17**
@@ -41,14 +41,14 @@ A full-stack web application for managing a library's collection, authors, and r
 - **Docker** (Containerization for Database)
 - **Docker Compose** (Service Orchestration)
 
-## 📋 Prerequisites
+##  Prerequisites
 
 Before you begin, ensure you have the following installed:
 - [Java 17 JDK](https://www.oracle.com/java/technologies/downloads/#java17)
 - [Maven](https://maven.apache.org/download.cgi)
 - [Docker](https://www.docker.com/products/docker-desktop/)
 
-## ⚙️ Getting Started
+##  Getting Started
 
 ### 1. Setup Database
 The project uses PostgreSQL. You can quickly start the database using Docker Compose:
@@ -71,13 +71,13 @@ Use the Maven wrapper to build and start the Spring Boot application:
 
 The application will be available at `http://localhost:8080`.
 
-## 📖 API Documentation
+##  API Documentation
 
 The project includes an interactive Swagger UI for exploring the REST API. Once the application is running, access it at:
 
 `http://localhost:8080/swagger-ui/index.html`
 
-## 🧪 Testing
+##  Testing
 
 The project emphasizes quality with multiple testing layers:
 
@@ -91,7 +91,7 @@ To run all tests:
 ./mvnw test
 ```
 
-## 📂 Project Structure
+##  Project Structure
 
 - `src/main/java`: Backend source code organized by layers (Controller, Service, Repository, Model, DTO, DAO).
 - `src/main/resources/templates`: Thymeleaf templates for the web UI.
