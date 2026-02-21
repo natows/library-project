@@ -29,7 +29,7 @@ public class RatingController {
 
     @Operation(summary = "Pobierz wszystkie oceny z paginacją")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista ocen została pobrana")
+            @ApiResponse(responseCode = "200", description = "Lista ocen została pobrana")
     })
     @GetMapping
     public ResponseEntity<Page<RatingDto>> getAllRatings(Pageable pageable) {
@@ -39,8 +39,8 @@ public class RatingController {
 
     @Operation(summary = "Pobierz ocenę po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Ocena znaleziona"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono oceny o podanym ID")
+            @ApiResponse(responseCode = "200", description = "Ocena znaleziona"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono oceny o podanym ID")
     })
     @GetMapping("/{id}")
     public ResponseEntity<RatingDto> getRatingById(@PathVariable Long id){
@@ -50,23 +50,23 @@ public class RatingController {
 
     @Operation(summary = "Dodaj nową ocenę")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Ocena została dodana"),
-        @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe"),
-        @ApiResponse(responseCode = "403", description = "Brak uprawnień lub naruszenie zasad dodawania ocen")
+            @ApiResponse(responseCode = "201", description = "Ocena została dodana"),
+            @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe"),
+            @ApiResponse(responseCode = "403", description = "Brak uprawnień lub naruszenie zasad dodawania ocen")
     })
     @PostMapping("/add")
     public ResponseEntity<RatingDto> addRating (@Valid @RequestBody RatingDto ratingDto) {
         RatingDto savedRating = ratingService.addRating(ratingDto);
         return ResponseEntity
-            .created(URI.create("/api/v1/ratings/" + savedRating.getId()))
-            .body(savedRating);
+                .created(URI.create("/api/v1/ratings/" + savedRating.getId()))
+                .body(savedRating);
     }
 
     @Operation(summary = "Aktualizuj ocenę po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Ocena została zaktualizowana"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono oceny o podanym ID"),
-        @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
+            @ApiResponse(responseCode = "200", description = "Ocena została zaktualizowana"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono oceny o podanym ID"),
+            @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
     })
     @PutMapping("/update/{id}")
     public ResponseEntity<RatingDto> updateRating(@PathVariable Long id, @Valid @RequestBody RatingDto ratingDto) {
@@ -76,8 +76,8 @@ public class RatingController {
 
     @Operation(summary = "Usuń ocenę po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Ocena została usunięta"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono oceny o podanym ID")
+            @ApiResponse(responseCode = "204", description = "Ocena została usunięta"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono oceny o podanym ID")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRating(@PathVariable Long id){

@@ -29,9 +29,9 @@ public class BookController{
 
     @Operation(summary = "Pobierz wszystkie książki z paginacją")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista książek została pobrana")
+            @ApiResponse(responseCode = "200", description = "Lista książek została pobrana")
     })
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<Page<BookDto>> getAllBooks(Pageable pageable){
         Page<BookDto> booksDto = bookService.getAllBooksDto(pageable);
         return ResponseEntity.ok(booksDto);
@@ -39,8 +39,8 @@ public class BookController{
 
     @Operation(summary = "Pobierz książkę po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Książka znaleziona"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID")
+            @ApiResponse(responseCode = "200", description = "Książka znaleziona"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID")
     })
     @GetMapping("/{id}")
     public ResponseEntity<BookDto> getBookById(@PathVariable Long id){
@@ -50,24 +50,24 @@ public class BookController{
 
     @Operation(summary = "Dodaj nową książkę")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Książka została dodana"),
-        @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
+            @ApiResponse(responseCode = "201", description = "Książka została dodana"),
+            @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
     })
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<BookDto> addBook (@Valid @RequestBody BookDto book) {
         BookDto savedBook = bookService.addBook(book);
         return ResponseEntity
-            .created(URI.create("/api/v1/books/" + savedBook.getId()))
-            .body(savedBook);
+                .created(URI.create("/api/books/" + savedBook.getId()))
+                .body(savedBook);
     }
 
     @Operation(summary = "Aktualizuj książkę po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Książka została zaktualizowana"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID"),
-        @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
+            @ApiResponse(responseCode = "200", description = "Książka została zaktualizowana"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID"),
+            @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
     })
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<BookDto> updateBook(@PathVariable Long id,@Valid  @RequestBody BookDto bookDto) {
         BookDto updatedBook = bookService.updateBook(id, bookDto);
         return ResponseEntity.ok(updatedBook);
@@ -75,10 +75,10 @@ public class BookController{
 
     @Operation(summary = "Usuń książkę po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Książka została usunięta"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID")
+            @ApiResponse(responseCode = "204", description = "Książka została usunięta"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID")
     })
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id){
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();

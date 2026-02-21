@@ -30,19 +30,19 @@ public class ReservationController {
 
     @Operation(summary = "Utwórz nową rezerwację dla książki")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Rezerwacja została utworzona"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID")
+            @ApiResponse(responseCode = "201", description = "Rezerwacja została utworzona"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono książki o podanym ID")
     })
     @PostMapping("/{bookId}")
     public ResponseEntity<ReservationDto> makeReservation(@PathVariable Long bookId) {
         ReservationDto reservation = reservationService.createNewReservation(bookId);
-        return ResponseEntity.ok(reservation);
+        return ResponseEntity.created(URI.create("/api/reservations/" + reservation.getId())).body(reservation);
     }
 
     @Operation(summary = "Potwierdź rezerwację")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Rezerwacja została potwierdzona"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
+            @ApiResponse(responseCode = "200", description = "Rezerwacja została potwierdzona"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
     })
     @PutMapping("/{reservationId}/confirm")
     public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long reservationId) {
@@ -52,8 +52,8 @@ public class ReservationController {
 
     @Operation(summary = "Wypożycz książkę z rezerwacji")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Książka została wypożyczona"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
+            @ApiResponse(responseCode = "200", description = "Książka została wypożyczona"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
     })
     @PutMapping("/{reservationId}/borrow")
     public ResponseEntity<ReservationDto> borrowReservation(@PathVariable Long reservationId) {
@@ -63,8 +63,8 @@ public class ReservationController {
 
     @Operation(summary = "Zwróć książkę z rezerwacji")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Książka została zwrócona"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
+            @ApiResponse(responseCode = "200", description = "Książka została zwrócona"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
     })
     @PutMapping("/{reservationId}/return")
     public ResponseEntity<ReservationDto> returnReservation(@PathVariable Long reservationId) {
@@ -74,10 +74,10 @@ public class ReservationController {
 
     @Operation(summary = "Anuluj rezerwację")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Rezerwacja została anulowana"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
+            @ApiResponse(responseCode = "204", description = "Rezerwacja została anulowana"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono rezerwacji o podanym ID")
     })
-    @DeleteMapping("/{reservationId}/cancel")
+    @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId) {
         reservationService.cancelReservation(reservationId);
         return ResponseEntity.noContent().build();

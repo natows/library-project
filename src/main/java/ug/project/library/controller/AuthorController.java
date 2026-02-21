@@ -29,7 +29,7 @@ public class AuthorController {
 
     @Operation(summary = "Pobierz wszystkich autorów z paginacją")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista autorów została pobrana")
+            @ApiResponse(responseCode = "200", description = "Lista autorów została pobrana")
     })
     @GetMapping
     public ResponseEntity<Page<AuthorDto>> getAllAuthors(Pageable pageable) {
@@ -39,8 +39,8 @@ public class AuthorController {
 
     @Operation(summary = "Pobierz autora po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Autor znaleziony"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono autora o podanym ID")
+            @ApiResponse(responseCode = "200", description = "Autor znaleziony"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono autora o podanym ID")
     })
     @GetMapping("/{id}")
     public ResponseEntity<AuthorDto> getAuthorById(@PathVariable Long id){
@@ -50,24 +50,24 @@ public class AuthorController {
 
     @Operation(summary = "Dodaj nowego autora")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Autor został dodany"),
-        @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
+            @ApiResponse(responseCode = "201", description = "Autor został dodany"),
+            @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
     })
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<AuthorDto> addAuthor (@Valid @RequestBody AuthorDto author) {
         AuthorDto savedAuthor = authorService.addAuthor(author);
         return ResponseEntity
-            .created(URI.create("/api/v1/authors/" + savedAuthor.getId()))
-            .body(savedAuthor);
+                .created(URI.create("/api/authors/" + savedAuthor.getId()))
+                .body(savedAuthor);
     }
 
     @Operation(summary = "Aktualizuj autora po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Autor został zaktualizowany"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono autora o podanym ID"),
-        @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
+            @ApiResponse(responseCode = "200", description = "Autor został zaktualizowany"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono autora o podanym ID"),
+            @ApiResponse(responseCode = "400", description = "Niepoprawne dane wejściowe")
     })
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<AuthorDto> updateAuthor(@PathVariable Long id, @Valid @RequestBody AuthorDto authorDto) {
         AuthorDto updatedAuthor = authorService.updateAuthor(id, authorDto);
         return ResponseEntity.ok(updatedAuthor);
@@ -75,10 +75,10 @@ public class AuthorController {
 
     @Operation(summary = "Usuń autora po ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Autor został usunięty"),
-        @ApiResponse(responseCode = "404", description = "Nie znaleziono autora o podanym ID")
+            @ApiResponse(responseCode = "204", description = "Autor został usunięty"),
+            @ApiResponse(responseCode = "404", description = "Nie znaleziono autora o podanym ID")
     })
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAuthor(@PathVariable Long id){
         authorService.deleteAuthor(id);
         return ResponseEntity.noContent().build();

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Edytuj komentarz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style th:replace="fragments/navbar :: navbar-styles"></style>
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Edytuj komentarz</h3>
+                </div>
+                <div class="card-body">
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <form th:action="@{/admin/comment-management/save}" th:object="${comment}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+                        <input type="hidden" th:field="*{userId}" />
+                        <input type="hidden" th:field="*{bookId}" />
+                        <input type="hidden" th:field="*{createdAt}" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Użytkownik</label>
+                            <input type="text" th:value="${comment.username}" class="form-control" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Książka</label>
+                            <input type="text" th:value="${comment.bookTitle}" class="form-control" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Treść</label>
+                            <textarea th:field="*{content}" class="form-control" id="content" rows="5" th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">Błąd treści</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/admin/comment-management}" class="btn btn-secondary">Anuluj</a>
+                            <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

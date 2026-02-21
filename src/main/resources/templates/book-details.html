@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #ecf0f1;
         }
 
         /* Book Detail Styles */
@@ -28,9 +28,10 @@
 
         .book-detail-container {
             background: white;
-            border-radius: 12px;
+            border-radius: 4px;
             padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #dee2e6;
             display: grid;
             grid-template-columns: 300px 1fr;
             gap: 2rem;
@@ -38,8 +39,9 @@
 
         .book-cover {
             width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border: 1px solid #dee2e6;
         }
 
         .book-info {
@@ -50,14 +52,17 @@
 
         .book-title {
             font-size: 2rem;
-            color: #333;
+            color: #2c3e50;
             margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-family: 'Georgia', serif;
         }
 
         .book-authors {
             font-size: 1.2rem;
-            color: #667eea;
+            color: #8b4513;
             margin-bottom: 1rem;
+            font-weight: 500;
         }
 
         .book-meta {
@@ -74,14 +79,15 @@
 
         .meta-label {
             font-weight: 600;
-            color: #666;
+            color: #6c757d;
             font-size: 0.9rem;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .meta-value {
             font-size: 1.1rem;
-            color: #333;
+            color: #2c3e50;
         }
 
         .book-genres {
@@ -91,11 +97,12 @@
         }
 
         .genre-tag {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #8b4513;
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
             font-size: 0.9rem;
+            border: 1px solid #7a3a0f;
         }
 
         .book-rating {
@@ -103,24 +110,27 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 1.5rem;
-            color: #ffc107;
+            color: #d4af37;
         }
 
         .availability {
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 4px;
             font-weight: 600;
             text-align: center;
+            border: 1px solid;
         }
 
         .available {
             background-color: #d4edda;
             color: #155724;
+            border-color: #c3e6cb;
         }
 
         .unavailable {
             background-color: #f8d7da;
             color: #721c24;
+            border-color: #f5c6cb;
         }
 
         .action-buttons {
@@ -132,135 +142,138 @@
         .btn {
             padding: 0.75rem 2rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 4px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background-color 0.2s ease;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #8b4513;
             color: white;
+            border: 1px solid #7a3a0f;
         }
 
         .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            background-color: #a0522d;
         }
 
         .btn-primary:disabled {
-            background: #cccccc;        
-            color: #666666;            
-            cursor: not-allowed;       
-            opacity: 0.6;               
+            background-color: #6c757d;
+            color: #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+            border-color: #6c757d;
         }
 
         .btn-secondary {
-            background-color: #f0f0f0;
-            color: #333;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            border: 1px solid #dee2e6;
         }
 
         .btn-secondary:hover {
-            background-color: #e0e0e0;
+            background-color: #e9ecef;
         }
 
         .back-link {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #667eea;
+            color: #8b4513;
             text-decoration: none;
             margin-bottom: 1rem;
             font-weight: 600;
         }
 
         .back-link:hover {
+            color: #a0522d;
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
+<!-- Navigation Bar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="content">
-        <a href="/" class="back-link">
-            <i class="bi bi-arrow-left"></i> Back to catalog
-        </a>
+<div class="content">
+    <a href="/" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to catalog
+    </a>
 
-        <div class="book-detail-container">
+    <div class="book-detail-container">
+        <div>
+            <img th:src="${book.coverImageUrl}"
+                 th:alt="${book.title}"
+                 class="book-cover">
+        </div>
+
+        <div class="book-info">
             <div>
-                <img th:src="${book.coverImageUrl}" 
-                     th:alt="${book.title}" 
-                     class="book-cover">
-            </div>
-
-            <div class="book-info">
-                <div>
-                    <h1 class="book-title" th:text="${book.title}">Book Title</h1>
-                    <div class="book-authors">
+                <h1 class="book-title" th:text="${book.title}">Book Title</h1>
+                <div class="book-authors">
                         <span th:each="author, iterStat : ${book.authors}">
                             <span th:text="${author.fullName}">Author Name</span>
                             <span th:if="${!iterStat.last}">, </span>
                         </span>
-                    </div>
+                </div>
+            </div>
+
+            <div class="book-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Publisher</span>
+                    <span class="meta-value" th:text="${book.publisher}">Publisher Name</span>
                 </div>
 
-                <div class="book-meta">
-                    <div class="meta-item">
-                        <span class="meta-label">Publisher</span>
-                        <span class="meta-value" th:text="${book.publisher}">Publisher Name</span>
-                    </div>
+                <div class="meta-item">
+                    <span class="meta-label">Year Published</span>
+                    <span class="meta-value" th:text="${book.yearPublished}">2024</span>
+                </div>
 
-                    <div class="meta-item">
-                        <span class="meta-label">Year Published</span>
-                        <span class="meta-value" th:text="${book.yearPublished}">2024</span>
-                    </div>
+                <div class="meta-item">
+                    <span class="meta-label">Rating</span>
+                    <div class="book-rating">
+                        <span th:if="${book.avgRating != null}" th:text="${#numbers.formatDecimal(book.avgRating, 1, 1)} + ' ★'">4.5 ★</span>
+                        <span th:if="${book.avgRating == null}" style="color: #999;">No ratings yet</span>
+                        <a th:href="@{/reviews}" th:text="${numRatings} "></a>                        </div>
+                </div>
 
-                    <div class="meta-item">
-                        <span class="meta-label">Rating</span>
-                        <div class="book-rating">
-                            <span th:if="${book.avgRating != null}" th:text="${#numbers.formatDecimal(book.avgRating, 1, 1)} + ' ★'">4.5 ★</span>
-                            <span th:if="${book.avgRating == null}" style="color: #999;">No ratings yet</span>
-                            <a th:href="@{/reviews}" th:text="${numRatings} "></a>                        </div>
-                    </div>
-
-                    <div class="meta-item">
-                        <span class="meta-label">Availability</span>
-                        <div th:classappend="${book.quantityAvailable > 0} ? 'available' : 'unavailable'" 
-                             class="availability">
-                            <span th:if="${book.quantityAvailable > 0}" 
+                <div class="meta-item">
+                    <span class="meta-label">Availability</span>
+                    <div th:classappend="${book.quantityAvailable > 0} ? 'available' : 'unavailable'"
+                         class="availability">
+                            <span th:if="${book.quantityAvailable > 0}"
                                   th:text="'Available (' + ${book.quantityAvailable} + ' copies)'">Available</span>
-                            <span th:unless="${book.quantityAvailable > 0}">Out of stock</span>
-                        </div>
+                        <span th:unless="${book.quantityAvailable > 0}">Out of stock</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Genres -->
-                <div>
-                    <span class="meta-label">Genres</span>
-                    <div class="book-genres">
-                        <span class="genre-tag" th:each="genre : ${book.genres}" 
+            <!-- Genres -->
+            <div>
+                <span class="meta-label">Genres</span>
+                <div class="book-genres">
+                        <span class="genre-tag" th:each="genre : ${book.genres}"
                               th:text="${genre.name}">Genre</span>
-                    </div>
                 </div>
+            </div>
 
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <a th:href="${book.quantityAvailable > 0} ? @{/reservation/{id}(id=${book.id})} : '#'" 
-                       class="btn btn-primary" 
-                       th:style="${book.quantityAvailable == 0} ? 'pointer-events: none; opacity: 0.6;' : ''">
-                        <i class="bi bi-bookmark-plus"></i> Reserve Book
-                    </a>
-                    <button class="btn btn-secondary">
-                        <i class="bi bi-heart"></i> Add to Wishlist
-                    </button>
-                </div>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a th:href="${book.quantityAvailable > 0} ? @{/reservation/{id}(id=${book.id})} : '#'"
+                   class="btn btn-primary"
+                   th:style="${book.quantityAvailable == 0} ? 'pointer-events: none; opacity: 0.6;' : ''">
+                    <i class="bi bi-bookmark-plus"></i> Reserve Book
+                </a>
+                <button class="btn btn-secondary">
+                    <i class="bi bi-heart"></i> Add to Wishlist
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

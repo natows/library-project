@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import ug.project.library.service.AuthorService;
 import ug.project.library.service.BookService;
+import ug.project.library.service.CommentService;
 import ug.project.library.service.GenreService;
 import ug.project.library.service.UserService;
 
@@ -29,13 +30,15 @@ public class AdminViewController {
     private final GenreService genreService;
     private final jakarta.validation.Validator validator;
     private final UserService userService;
+    private final CommentService commentService;
 
-    public AdminViewController(BookService bookService, AuthorService authorService, GenreService genreService, jakarta.validation.Validator validator, UserService userService) {
+    public AdminViewController(BookService bookService, AuthorService authorService, GenreService genreService, jakarta.validation.Validator validator, UserService userService, CommentService commentService) {
         this.bookService = bookService;
         this.authorService = authorService;
         this.genreService = genreService;
         this.validator = validator;
         this.userService = userService;
+        this.commentService = commentService;
     }
 
     @GetMapping("/book-management")
@@ -192,6 +195,54 @@ public class AdminViewController {
             redirectAttributes.addFlashAttribute("error", "Failed to delete user.");
         }
         return "redirect:/admin/user-management";
+    }
+
+    @GetMapping("/comment-management")
+    public String listComments(Model model, @PageableDefault(size = 10) Pageable pageable) {
+        Page<CommentDto> comments = commentService.getAllComments(pageable);
+        model.addAttribute("comments", comments);
+        return "admin/comment-management";
+    }
+
+    @GetMapping("/comment-management/edit/{id}")
+    public String showEditCommentForm(@PathVariable Long id, Model model) {
+        CommentDto commentDto = commentService.getCommentById(id);
+        model.addAttribute("comment", commentDto);
+        return "admin/comment-form";
+    }
+
+    @PostMapping("/comment-management/save")
+    public String saveComment(@ModelAttribute("comment") CommentDto commentDto, BindingResult bindingResult,
+                              Model model, RedirectAttributes redirectAttributes) {
+        
+        validator.validate(commentDto).forEach(violation ->
+            bindingResult.rejectValue(violation.getPropertyPath().toString(), "error", violation.getMessage())
+        );
+
+        if (bindingResult.hasErrors()) {
+            return "admin/comment-form";
+        }
+
+        try {
+            commentService.updateComment(commentDto.getId(), commentDto);
+            redirectAttributes.addFlashAttribute("success", "Komentarz został zaktualizowany.");
+        } catch (Exception e) {
+            model.addAttribute("error", "Wystąpił błąd: " + e.getMessage());
+            return "admin/comment-form";
+        }
+
+        return "redirect:/admin/comment-management";
+    }
+
+    @PostMapping("/comment-management/delete/{id}")
+    public String deleteComment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            commentService.deleteComment(id);
+            redirectAttributes.addFlashAttribute("success", "Komentarz został usunięty.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Nie udało się usunąć komentarza.");
+        }
+        return "redirect:/admin/comment-management";
     }
 
 
