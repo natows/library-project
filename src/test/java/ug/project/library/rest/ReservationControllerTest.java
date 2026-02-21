@@ -40,7 +40,7 @@ public class ReservationControllerTest {
 
         mockMvc.perform(post("/api/reservations/1")
                         .with(csrf()))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("OCZEKUJĄCA"));
     }
 
@@ -83,7 +83,7 @@ public class ReservationControllerTest {
     @Test
     @WithMockUser
     public void shouldCancelReservation() throws Exception {
-        mockMvc.perform(delete("/api/reservations/1/cancel")
+        mockMvc.perform(delete("/api/reservations/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }

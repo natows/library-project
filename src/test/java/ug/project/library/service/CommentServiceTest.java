@@ -12,6 +12,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ug.project.library.dto.CommentDto;
+import ug.project.library.exceptions.BookNotFoundException;
+import ug.project.library.exceptions.CommentNotFoundException;
+import ug.project.library.exceptions.UserNotFoundException;
 import ug.project.library.model.entity.Book;
 import ug.project.library.model.entity.Comment;
 import ug.project.library.model.entity.User;
@@ -78,6 +81,20 @@ class CommentServiceTest {
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getContent()).isEqualTo("Great book!");
+        verify(commentRepository).findAll(pageable);
+    }
+
+    @Test
+    @DisplayName("getAllCommentsForBook should return page of DTOs")
+    void getAllCommentsForBook_ShouldReturnPageOfDtos() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(commentRepository.findByBookId(1L, pageable)).thenReturn(new PageImpl<>(List.of(comment)));
+
+        Page<CommentDto> result = commentService.getAllCommentsForBook(1L, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getContent()).isEqualTo("Great book!");
+        verify(commentRepository).findByBookId(1L, pageable);
     }
 
     @Test
@@ -88,6 +105,7 @@ class CommentServiceTest {
         CommentDto result = commentService.getCommentById(1L);
 
         assertThat(result.getContent()).isEqualTo("Great book!");
+        verify(commentRepository).findById(1L);
     }
 
     @Test
@@ -95,7 +113,8 @@ class CommentServiceTest {
     void getCommentById_ShouldThrowException_WhenNotFound() {
         when(commentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> commentService.getCommentById(1L));
+        assertThrows(CommentNotFoundException.class, () -> commentService.getCommentById(1L));
+        verify(commentRepository).findById(1L);
     }
 
     @Test
@@ -108,7 +127,32 @@ class CommentServiceTest {
         CommentDto result = commentService.addComment(commentDto);
 
         assertThat(result.getContent()).isEqualTo("Great book!");
+        verify(userRepository).findById(1L);
+        verify(bookRepository).findById(1L);
         verify(commentRepository).save(any(Comment.class));
+    }
+
+    @Test
+    @DisplayName("addComment should throw UserNotFoundException when user not found")
+    void addComment_ShouldThrowUserNotFoundException_WhenUserNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> commentService.addComment(commentDto));
+        verify(userRepository).findById(1L);
+        verifyNoInteractions(bookRepository);
+        verifyNoInteractions(commentRepository);
+    }
+
+    @Test
+    @DisplayName("addComment should throw BookNotFoundException when book not found")
+    void addComment_ShouldThrowBookNotFoundException_WhenBookNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(BookNotFoundException.class, () -> commentService.addComment(commentDto));
+        verify(userRepository).findById(1L);
+        verify(bookRepository).findById(1L);
+        verifyNoInteractions(commentRepository);
     }
 
     @Test
@@ -121,7 +165,18 @@ class CommentServiceTest {
         CommentDto result = commentService.updateComment(1L, commentDto);
 
         assertThat(result.getContent()).isEqualTo("Updated content");
+        verify(commentRepository).findById(1L);
         verify(commentRepository).save(comment);
+    }
+
+    @Test
+    @DisplayName("updateComment should throw CommentNotFoundException when not found")
+    void updateComment_ShouldThrowCommentNotFoundException_WhenNotFound() {
+        when(commentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CommentNotFoundException.class, () -> commentService.updateComment(1L, commentDto));
+        verify(commentRepository).findById(1L);
+        verify(commentRepository, never()).save(any());
     }
 
     @Test
@@ -131,6 +186,7 @@ class CommentServiceTest {
 
         commentService.deleteComment(1L);
 
+        verify(commentRepository).existsById(1L);
         verify(commentRepository).deleteById(1L);
     }
 
@@ -139,6 +195,8 @@ class CommentServiceTest {
     void deleteComment_ShouldThrowException_WhenNotFound() {
         when(commentRepository.existsById(1L)).thenReturn(false);
 
-        assertThrows(RuntimeException.class, () -> commentService.deleteComment(1L));
+        assertThrows(CommentNotFoundException.class, () -> commentService.deleteComment(1L));
+        verify(commentRepository).existsById(1L);
+        verify(commentRepository, never()).deleteById(anyLong());
     }
 }

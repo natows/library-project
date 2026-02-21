@@ -68,6 +68,7 @@ class AuthServiceTest {
         Long result = authService.getCurrentUserId();
 
         assertThat(result).isEqualTo(1L);
+        verify(userRepository).findByUsername("testuser");
     }
 
     @Test
@@ -75,8 +76,53 @@ class AuthServiceTest {
     void getCurrentUserId_ShouldThrowException_WhenNotAuthenticated() {
         when(securityContext.getAuthentication()).thenReturn(null);
         SecurityContextHolder.setContext(securityContext);
+        when(userRepository.findByUsername(null)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> authService.getCurrentUserId());
+        verify(userRepository).findByUsername(null);
+    }
+
+    @Test
+    @DisplayName("getCurrentUsername should return null when anonymous user")
+    void getCurrentUsername_ShouldReturnNull_WhenAnonymousUser() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("anonymousUser");
+        when(userRepository.findByUsername(null)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> authService.getCurrentUserId());
+        verify(userRepository).findByUsername(null);
+    }
+
+    @Test
+    @DisplayName("getCurrentUser should return user when authenticated")
+    void getCurrentUser_ShouldReturnUser_WhenAuthenticated() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("testuser");
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        User result = authService.getCurrentUser();
+
+        assertThat(result).isEqualTo(user);
+        verify(userRepository).findByUsername("testuser");
+    }
+
+    @Test
+    @DisplayName("getCurrentUser should throw exception when user not found")
+    void getCurrentUser_ShouldThrowException_WhenUserNotFound() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("testuser");
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> authService.getCurrentUser());
+        verify(userRepository).findByUsername("testuser");
     }
 
     @Test
@@ -90,6 +136,9 @@ class AuthServiceTest {
         User result = authService.registerUser(registrationDto);
 
         assertThat(result).isNotNull();
+        verify(userRepository).findByUsername(registrationDto.getUsername());
+        verify(userRepository).findByEmail(registrationDto.getEmail());
+        verify(passwordEncoder).encode(registrationDto.getPassword());
         verify(userRepository).save(any(User.class));
     }
 
@@ -99,6 +148,9 @@ class AuthServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         assertThrows(UsernameAlreadyExistsException.class, () -> authService.registerUser(registrationDto));
+        verify(userRepository).findByUsername("testuser");
+        verify(userRepository, never()).findByEmail(anyString());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -108,6 +160,9 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         assertThrows(EmailAlreadyExistsException.class, () -> authService.registerUser(registrationDto));
+        verify(userRepository).findByUsername(registrationDto.getUsername());
+        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -118,5 +173,8 @@ class AuthServiceTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> authService.registerUser(registrationDto));
+        verify(userRepository).findByUsername(registrationDto.getUsername());
+        verify(userRepository).findByEmail(registrationDto.getEmail());
+        verify(userRepository, never()).save(any(User.class));
     }
 }

@@ -179,7 +179,6 @@ class BookRepositoryTest {
     void findByTitleAndAuthors_ShouldReturnEmptyWhenAuthorsDoNotMatch() {
         Book book = bookRepository.findAll().get(0);
         
-        // Dodaj nowego autora, który nie jest autorem tej książki
         Author otherAuthor = new Author();
         otherAuthor.setName("Other");
         otherAuthor.setSurname("Author");
@@ -196,7 +195,6 @@ class BookRepositoryTest {
     @Test
     @DisplayName("Nie powinno znaleźć książki gdy brakuje jednego z autorów")
     void findByTitleAndAuthors_ShouldReturnEmptyWhenAuthorIsMissing() {
-        // Stwórz książkę z dwoma autorami
         Author a1 = new Author("Author", "One", new ArrayList<>());
         Author a2 = new Author("Author", "Two", new ArrayList<>());
         a1 = authorRepository.save(a1);
@@ -210,7 +208,6 @@ class BookRepositoryTest {
         book.setQuantityAvailable(5);
         bookRepository.save(book);
         
-        // Szukaj tylko po jednym autorze
         List<Book> found = bookRepository.findByTitleAndAuthors("Two Authors Book", List.of(a1.getId()), 1L);
         assertThat(found).isEmpty();
     }

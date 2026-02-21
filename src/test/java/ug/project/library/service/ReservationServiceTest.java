@@ -72,8 +72,21 @@ class ReservationServiceTest {
         ReservationDto result = reservationService.createNewReservation(1L);
 
         assertThat(result).isNotNull();
+        verify(authService).getCurrentUser();
+        verify(bookService).getBookById(1L);
         verify(bookService).deincrementQuantityAvailable(book);
         verify(reservationRepository).save(any(Reservation.class));
+    }
+
+    @Test
+    @DisplayName("createNewReservation should throw exception when user not logged in")
+    void createNewReservation_ShouldThrowException_WhenUserNotLoggedIn() {
+        when(authService.getCurrentUser()).thenReturn(null);
+
+        assertThrows(IllegalStateException.class, () -> reservationService.createNewReservation(1L));
+        verify(authService).getCurrentUser();
+        verifyNoInteractions(bookService);
+        verifyNoInteractions(reservationRepository);
     }
 
     @Test
@@ -86,7 +99,22 @@ class ReservationServiceTest {
         ReservationDto result = reservationService.confirmReservation(1L);
 
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.POTWIERDZONA);
+        verify(authService).getCurrentUserId();
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
         verify(reservationRepository).save(reservation);
+    }
+
+    @Test
+    @DisplayName("confirmReservation should throw exception when status not OCZEKUJĄCA")
+    void confirmReservation_ShouldThrowException_WhenStatusNotOczekujaca() {
+        reservation.setStatus(ReservationStatus.POTWIERDZONA);
+        when(authService.getCurrentUserId()).thenReturn(1L);
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class, () -> reservationService.confirmReservation(1L));
+        verify(authService).getCurrentUserId();
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
+        verify(reservationRepository, never()).save(any());
     }
 
     @Test
@@ -112,7 +140,20 @@ class ReservationServiceTest {
         ReservationDto result = reservationService.borrowReservation(1L);
 
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WYPOŻYCZONA);
+        verify(authService).getCurrentUserId();
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
         verify(reservationRepository).save(reservation);
+    }
+
+    @Test
+    @DisplayName("borrowReservation should throw exception when status not POTWIERDZONA")
+    void borrowReservation_ShouldThrowException_WhenStatusNotPotwierdzona() {
+        reservation.setStatus(ReservationStatus.OCZEKUJĄCA);
+        when(authService.getCurrentUserId()).thenReturn(1L);
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class, () -> reservationService.borrowReservation(1L));
+        verify(reservationRepository, never()).save(any());
     }
 
     @Test
@@ -126,20 +167,75 @@ class ReservationServiceTest {
         ReservationDto result = reservationService.returnReservation(1L);
 
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.ZWRÓCONA);
+        verify(authService).getCurrentUserId();
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
         verify(bookService).incrementQuantityAvailable(book);
         verify(reservationRepository).save(reservation);
     }
 
     @Test
-    @DisplayName("cancelReservation should delete and increment quantity")
-    void cancelReservation_ShouldDeleteAndIncrementQuantity() {
+    @DisplayName("returnReservation should throw exception when status not WYPOŻYCZONA")
+    void returnReservation_ShouldThrowException_WhenStatusNotWypozyczona() {
+        reservation.setStatus(ReservationStatus.POTWIERDZONA);
+        when(authService.getCurrentUserId()).thenReturn(1L);
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class, () -> reservationService.returnReservation(1L));
+        verify(reservationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("cancelReservation should delete and increment quantity when status is OCZEKUJĄCA")
+    void cancelReservation_ShouldDeleteAndIncrementQuantity_WhenOczekujaca() {
+        reservation.setStatus(ReservationStatus.OCZEKUJĄCA);
         when(authService.getCurrentUserId()).thenReturn(1L);
         when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
 
         reservationService.cancelReservation(1L);
 
+        verify(authService).getCurrentUserId();
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
         verify(bookService).incrementQuantityAvailable(book);
         verify(reservationRepository).delete(reservation);
+    }
+
+    @Test
+    @DisplayName("cancelReservation should delete and increment quantity when status is POTWIERDZONA")
+    void cancelReservation_ShouldDeleteAndIncrementQuantity_WhenPotwierdzona() {
+        reservation.setStatus(ReservationStatus.POTWIERDZONA);
+        when(authService.getCurrentUserId()).thenReturn(1L);
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+
+        reservationService.cancelReservation(1L);
+
+        verify(authService).getCurrentUserId();
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
+        verify(bookService).incrementQuantityAvailable(book);
+        verify(reservationRepository).delete(reservation);
+    }
+
+    @Test
+    @DisplayName("cancelReservation should throw exception when status is WYPOŻYCZONA")
+    void cancelReservation_ShouldThrowException_WhenWypozyczona() {
+        reservation.setStatus(ReservationStatus.WYPOŻYCZONA);
+        when(authService.getCurrentUserId()).thenReturn(1L);
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class, () -> reservationService.cancelReservation(1L));
+        verify(bookService, never()).incrementQuantityAvailable(any());
+        verify(reservationRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("cancelReservation should throw exception when status is ZWRÓCONA")
+    void cancelReservation_ShouldThrowException_WhenZwrocona() {
+        reservation.setStatus(ReservationStatus.ZWRÓCONA);
+        when(authService.getCurrentUserId()).thenReturn(1L);
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class, () -> reservationService.cancelReservation(1L));
+        verify(bookService, never()).incrementQuantityAvailable(any());
+        verify(reservationRepository, never()).delete(any());
     }
 
     @Test
@@ -150,6 +246,7 @@ class ReservationServiceTest {
         List<ReservationDto> result = reservationService.getAllReservations();
 
         assertThat(result).hasSize(1);
+        verify(reservationRepository).findAll();
     }
 
     @Test
@@ -161,6 +258,7 @@ class ReservationServiceTest {
         Page<Reservation> result = reservationService.getUserReservationHistory(1L, pageable);
 
         assertThat(result.getContent()).hasSize(1);
+        verify(reservationRepository).findPastReservations(1L, pageable);
     }
 
     @Test
@@ -171,5 +269,48 @@ class ReservationServiceTest {
         List<Reservation> result = reservationService.getUserActiveReservations(1L);
 
         assertThat(result).hasSize(1);
+        verify(reservationDao).findActiveReservationsByUserId(1L);
+    }
+
+    @Test
+    @DisplayName("getReservationById should return reservation when found")
+    void getReservationById_ShouldReturnReservation_WhenFound() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        Reservation result = reservationService.getReservationById(1L);
+
+        assertThat(result).isEqualTo(reservation);
+        verify(reservationRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getReservationById should throw exception when not found")
+    void getReservationById_ShouldThrowException_WhenNotFound() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ug.project.library.exceptions.ReservationNotFoundError.class, () -> reservationService.getReservationById(1L));
+        verify(reservationRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getReservationByIdAndUserId should throw exception when not found")
+    void getReservationByIdAndUserId_ShouldThrowException_WhenNotFound() {
+        when(reservationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> reservationService.getReservationByIdAndUserId(1L, 1L));
+        verify(reservationRepository).findByIdAndUserId(1L, 1L);
+    }
+
+    @Test
+    @DisplayName("expireReservations should expire all found reservations")
+    void expireReservations_ShouldExpireAllFound() {
+        List<Reservation> expiredList = List.of(reservation);
+        when(reservationRepository.findExpiredReservations(any(LocalDateTime.class))).thenReturn(expiredList);
+
+        reservationService.expireReservations();
+
+        verify(reservationRepository).findExpiredReservations(any(LocalDateTime.class));
+        verify(bookService).incrementQuantityAvailable(book);
+        verify(reservationRepository).delete(reservation);
     }
 }

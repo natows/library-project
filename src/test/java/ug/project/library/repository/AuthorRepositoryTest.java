@@ -207,7 +207,6 @@ class AuthorRepositoryTest {
     @Test
     @DisplayName("Powinno obsłużyć paginację dla najpopularniejszych autorów")
     void findMostPopularAuthors_ShouldHandlePagination() {
-        // Przygotuj autora, książkę, użytkownika i rezerwację
         Author author = authorRepository.save(new Author("Test", "Autor", new ArrayList<>()));
         Book book = new Book();
         book.setTitle("Testowa książka");

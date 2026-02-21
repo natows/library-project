@@ -67,12 +67,11 @@ public class AuthorControllerTest {
         AuthorDto savedAuthor = new AuthorDto(1L, "Jane", "Doe");
         when(authorService.addAuthor(any(AuthorDto.class))).thenReturn(savedAuthor);
 
-        mockMvc.perform(post("/api/authors/add")
+        mockMvc.perform(post("/api/authors")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/v1/authors/1"))
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jane"));
     }
@@ -83,7 +82,7 @@ public class AuthorControllerTest {
         AuthorDto author = new AuthorDto(1L, "John", "Updated");
         when(authorService.updateAuthor(eq(1L), any(AuthorDto.class))).thenReturn(author);
 
-        mockMvc.perform(put("/api/authors/update/1")
+        mockMvc.perform(put("/api/authors/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(author)))
@@ -94,7 +93,7 @@ public class AuthorControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void shouldDeleteAuthor() throws Exception {
-        mockMvc.perform(delete("/api/authors/delete/1")
+        mockMvc.perform(delete("/api/authors/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }

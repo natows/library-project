@@ -20,6 +20,8 @@ import ug.project.library.repository.RatingRepository;
 import ug.project.library.repository.ReservationRepository;
 import ug.project.library.repository.UserRepository;
 
+import ug.project.library.exceptions.RatingNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -84,6 +86,52 @@ class RatingServiceTest {
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getScore()).isEqualTo(5);
+        verify(ratingRepository).findAll(pageable);
+    }
+
+    @Test
+    @DisplayName("getAllRatingsForBook should return page of DTOs")
+    void getAllRatingsForBook_ShouldReturnPageOfDtos() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(ratingRepository.findByBookId(1L, pageable)).thenReturn(new PageImpl<>(List.of(rating)));
+
+        Page<RatingDto> result = ratingService.getAllRatingsForBook(1L, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getScore()).isEqualTo(5);
+        verify(ratingRepository).findByBookId(1L, pageable);
+    }
+
+    @Test
+    @DisplayName("getRatingDtoById should return DTO when found")
+    void getRatingDtoById_ShouldReturnDto_WhenFound() {
+        when(ratingRepository.findById(1L)).thenReturn(Optional.of(rating));
+
+        RatingDto result = ratingService.getRatingDtoById(1L);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getScore()).isEqualTo(5);
+        verify(ratingRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getRatingDtoById should throw exception when not found")
+    void getRatingDtoById_ShouldThrowException_WhenNotFound() {
+        when(ratingRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RatingNotFoundException.class, () -> ratingService.getRatingDtoById(1L));
+        verify(ratingRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getAverageRating should return average")
+    void getAverageRating_ShouldReturnAverage() {
+        when(ratingRepository.calculateAverageRating(1L)).thenReturn(4.2);
+
+        Double result = ratingService.getAverageRating(1L);
+
+        assertThat(result).isEqualTo(4.2);
+        verify(ratingRepository).calculateAverageRating(1L);
     }
 
     @Test
@@ -102,7 +150,21 @@ class RatingServiceTest {
         assertThat(result.getScore()).isEqualTo(5);
         verify(ratingRepository).save(any(Rating.class));
         verify(bookRepository).save(book);
+        verify(ratingRepository, times(1)).findByUserIdAndBookId(1L, 1L);
+        verify(reservationRepository).existsLoanByBookIdAndUserId(1L, 1L);
+        verify(ratingRepository).calculateAverageRating(1L);
         assertThat(book.getAvgRating()).isEqualTo(4.5);
+    }
+
+    @Test
+    @DisplayName("addRating should throw exception when already rated")
+    void addRating_ShouldThrowException_WhenAlreadyRated() {
+        when(authService.getCurrentUser()).thenReturn(user);
+        when(bookService.getBookById(1L)).thenReturn(book);
+        when(ratingRepository.findByUserIdAndBookId(1L, 1L)).thenReturn(Optional.of(rating));
+
+        assertThrows(IllegalStateException.class, () -> ratingService.addRating(ratingDto));
+        verify(ratingRepository).findByUserIdAndBookId(1L, 1L);
     }
 
     @Test
@@ -114,12 +176,13 @@ class RatingServiceTest {
         when(reservationRepository.existsLoanByBookIdAndUserId(1L, 1L)).thenReturn(false);
 
         assertThrows(IllegalStateException.class, () -> ratingService.addRating(ratingDto));
+        verify(reservationRepository).existsLoanByBookIdAndUserId(1L, 1L);
     }
 
     @Test
     @DisplayName("addRating should throw exception when score is invalid")
     void addRating_ShouldThrowException_WhenScoreInvalid() {
-        ratingDto.setScore(10); // RatingService expects 1-5
+        ratingDto.setScore(10); 
         when(authService.getCurrentUser()).thenReturn(user);
         when(bookService.getBookById(1L)).thenReturn(book);
         when(ratingRepository.findByUserIdAndBookId(1L, 1L)).thenReturn(Optional.empty());
@@ -138,11 +201,13 @@ class RatingServiceTest {
         when(ratingRepository.findRecentRatingsByUser(eq(1L), any(LocalDateTime.class))).thenReturn(List.of(rating));
 
         assertThrows(IllegalStateException.class, () -> ratingService.addRating(ratingDto));
+        verify(ratingRepository).findRecentRatingsByUser(eq(1L), any(LocalDateTime.class));
     }
 
     @Test
-    @DisplayName("updateRating should update when not in cooldown")
-    void updateRating_ShouldUpdate_WhenValid() {
+    @DisplayName("updateRating should update when not in cooldown and handle null lastModifiedAt")
+    void updateRating_ShouldUpdate_WhenValidAndNoCooldown() {
+        rating.setLastModifiedAt(null);
         when(authService.getCurrentUser()).thenReturn(user);
         when(ratingRepository.findById(1L)).thenReturn(Optional.of(rating));
         when(ratingRepository.save(any(Rating.class))).thenReturn(rating);
@@ -154,6 +219,53 @@ class RatingServiceTest {
 
         assertThat(result.getScore()).isEqualTo(4);
         verify(ratingRepository).save(rating);
+        verify(ratingRepository).calculateAverageRating(1L);
+    }
+
+    @Test
+    @DisplayName("updateBookAverageRating should handle null average and set 0.0")
+    void updateRating_ShouldHandleNullAverageFromRepo() {
+        when(authService.getCurrentUser()).thenReturn(user);
+        when(ratingRepository.findById(1L)).thenReturn(Optional.of(rating));
+        when(ratingRepository.save(any(Rating.class))).thenReturn(rating);
+        when(ratingRepository.calculateAverageRating(1L)).thenReturn(null); 
+        when(bookService.getBookById(1L)).thenReturn(book);
+
+        ratingService.updateRating(1L, ratingDto);
+
+        assertThat(book.getAvgRating()).isEqualTo(0.0);
+        verify(ratingRepository).calculateAverageRating(1L);
+        verify(bookRepository).save(book);
+    }
+
+    @Test
+    @DisplayName("updateRating should throw exception when not in database")
+    void updateRating_ShouldThrowException_WhenNotFound() {
+        when(ratingRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RatingNotFoundException.class, () -> ratingService.updateRating(1L, ratingDto));
+        verify(ratingRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("deleteRating should throw exception when not in database")
+    void deleteRating_ShouldThrowException_WhenNotFound() {
+        when(ratingRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RatingNotFoundException.class, () -> ratingService.deleteRating(1L));
+        verify(ratingRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("updateRating should throw exception when not own rating")
+    void updateRating_ShouldThrowException_WhenNotOwnRating() {
+        User anotherUser = new User();
+        anotherUser.setId(2L);
+        when(authService.getCurrentUser()).thenReturn(anotherUser);
+        when(ratingRepository.findById(1L)).thenReturn(Optional.of(rating));
+
+        assertThrows(IllegalStateException.class, () -> ratingService.updateRating(1L, ratingDto));
+        verify(ratingRepository, never()).save(any());
     }
 
     @Test
@@ -178,6 +290,19 @@ class RatingServiceTest {
 
         verify(ratingRepository).deleteById(1L);
         verify(bookRepository).save(book);
+        verify(ratingRepository).calculateAverageRating(1L);
         assertThat(book.getAvgRating()).isEqualTo(3.0);
+    }
+
+    @Test
+    @DisplayName("deleteRating should throw exception when not own rating")
+    void deleteRating_ShouldThrowException_WhenNotOwnRating() {
+        User anotherUser = new User();
+        anotherUser.setId(2L);
+        when(authService.getCurrentUser()).thenReturn(anotherUser);
+        when(ratingRepository.findById(1L)).thenReturn(Optional.of(rating));
+
+        assertThrows(IllegalStateException.class, () -> ratingService.deleteRating(1L));
+        verify(ratingRepository, never()).deleteById(any());
     }
 }

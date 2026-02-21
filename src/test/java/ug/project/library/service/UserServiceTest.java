@@ -61,6 +61,7 @@ class UserServiceTest {
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getUsername()).isEqualTo("testuser");
+        verify(userRepository).findAll(pageable);
     }
 
     @Test
@@ -71,6 +72,7 @@ class UserServiceTest {
         User result = userService.getUserById(1L);
 
         assertThat(result.getUsername()).isEqualTo("testuser");
+        verify(userRepository).findById(1L);
     }
 
     @Test
@@ -79,6 +81,18 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.getUserById(1L));
+        verify(userRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getUserDtoById should return DTO when found")
+    void getUserDtoById_ShouldReturnDto_WhenFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserDto result = userService.getUserDtoById(1L);
+
+        assertThat(result.getUsername()).isEqualTo("testuser");
+        verify(userRepository).findById(1L);
     }
 
     @Test
@@ -94,6 +108,59 @@ class UserServiceTest {
 
         assertThat(result.getUsername()).isEqualTo("updated");
         assertThat(result.getUserRole()).isEqualTo(UserRole.ADMIN);
+        verify(userRepository).findById(1L);
+        verify(userRepository).findByEmail("updated@example.com");
+        verify(userRepository).findByUsername("updated");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updateUser should throw exception when email exists for other user")
+    void updateUser_ShouldThrowException_WhenEmailExistsForOtherUser() {
+        User existingOtherUser = new User();
+        existingOtherUser.setId(2L);
+        
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("other@example.com")).thenReturn(Optional.of(existingOtherUser));
+
+        UserDto updateDto = new UserDto(1L, "updated", "other@example.com", UserRole.USER);
+        
+        assertThrows(EmailAlreadyExistsException.class, () -> userService.updateUser(1L, updateDto));
+        verify(userRepository).findByEmail("other@example.com");
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateUser should throw exception when username exists for other user")
+    void updateUser_ShouldThrowException_WhenUsernameExistsForOtherUser() {
+        User existingOtherUser = new User();
+        existingOtherUser.setId(2L);
+        
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("otheruser")).thenReturn(Optional.of(existingOtherUser));
+
+        UserDto updateDto = new UserDto(1L, "otheruser", "test@example.com", UserRole.USER);
+        
+        assertThrows(UsernameAlreadyExistsException.class, () -> userService.updateUser(1L, updateDto));
+        verify(userRepository).findByUsername("otheruser");
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateUser should not update password when password is empty")
+    void updateUser_ShouldNotUpdatePassword_WhenPasswordIsEmpty() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        UserDto updateDto = new UserDto(1L, "testuser", "test@example.com", UserRole.USER);
+        updateDto.setPassword("");
+        
+        userService.updateUser(1L, updateDto);
+
+        verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository).save(user);
     }
 
@@ -116,6 +183,8 @@ class UserServiceTest {
 
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getUsername()).isEqualTo("newuser");
+        verify(userRepository).findByEmail("new@example.com");
+        verify(userRepository).findByUsername("newuser");
         verify(userRepository).save(any(User.class));
         verify(passwordEncoder).encode("password123");
     }
@@ -128,6 +197,9 @@ class UserServiceTest {
         UserDto newDto = new UserDto(null, "newuser", "test@example.com", UserRole.USER);
         
         assertThrows(EmailAlreadyExistsException.class, () -> userService.addUser(newDto));
+        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, never()).findByUsername(anyString());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -139,6 +211,9 @@ class UserServiceTest {
         UserDto newDto = new UserDto(null, "testuser", "new@example.com", UserRole.USER);
         
         assertThrows(UsernameAlreadyExistsException.class, () -> userService.addUser(newDto));
+        verify(userRepository).findByEmail("new@example.com");
+        verify(userRepository).findByUsername("testuser");
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -148,6 +223,7 @@ class UserServiceTest {
 
         userService.deleteUser(1L);
 
+        verify(userRepository).existsById(1L);
         verify(userRepository).deleteById(1L);
     }
 
@@ -157,5 +233,7 @@ class UserServiceTest {
         when(userRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(UserNotFoundException.class, () -> userService.deleteUser(1L));
+        verify(userRepository).existsById(1L);
+        verify(userRepository, never()).deleteById(anyLong());
     }
 }

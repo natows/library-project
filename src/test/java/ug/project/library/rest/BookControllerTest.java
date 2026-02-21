@@ -45,7 +45,7 @@ public class BookControllerTest {
         PageRequest pageable = PageRequest.of(0, 10);
         when(bookService.getAllBooksDto(any())).thenReturn(new PageImpl<>(Collections.singletonList(book), pageable, 1));
 
-        mockMvc.perform(get("/api/books/all"))
+        mockMvc.perform(get("/api/books"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("Sample Book"));
     }
@@ -68,7 +68,7 @@ public class BookControllerTest {
         BookDto savedBook = createSampleBookDto(1L, "New Book");
         when(bookService.addBook(any(BookDto.class))).thenReturn(savedBook);
 
-        mockMvc.perform(post("/api/books/add")
+        mockMvc.perform(post("/api/books")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(book)))
@@ -83,7 +83,7 @@ public class BookControllerTest {
         BookDto book = createSampleBookDto(1L, "Updated Book");
         when(bookService.updateBook(eq(1L), any(BookDto.class))).thenReturn(book);
 
-        mockMvc.perform(put("/api/books/update/1")
+        mockMvc.perform(put("/api/books/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(book)))
@@ -94,7 +94,7 @@ public class BookControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void shouldDeleteBook() throws Exception {
-        mockMvc.perform(delete("/api/books/delete/1")
+        mockMvc.perform(delete("/api/books/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
