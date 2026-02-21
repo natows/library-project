@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
-@RestControllerAdvice
+@RestControllerAdvice(annotations = org.springframework.web.bind.annotation.RestController.class)
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({AuthorNotFoundException.class, BookNotFoundException.class,
             CommentNotFoundException.class, GenreNotFoundException.class,
-            RatingNotFoundException.class, UserNotFoundException.class})
+            RatingNotFoundException.class, UserNotFoundException.class, ReservationNotFoundError.class})
     public ResponseEntity<ErrorResponse> handleNotFoundExceptions(RuntimeException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
@@ -35,6 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+        System.out.println("[DEBUG_LOG] Global exception caught: " + ex.getMessage());
+        ex.printStackTrace();
         ErrorResponse error = new ErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
             "Wystąpił nieoczekiwany błąd: " + ex.getMessage(),

@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ug.project.library.dto.UserRegistrationDto;
 import ug.project.library.exceptions.EmailAlreadyExistsException;
 import ug.project.library.exceptions.UserNotFoundException;
@@ -66,6 +67,7 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public User registerUser(UserRegistrationDto userRegistrationDto) {
         verifyRegistrationData(userRegistrationDto);
         User user = new User(userRegistrationDto.getUsername(),

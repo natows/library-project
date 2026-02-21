@@ -82,6 +82,7 @@ public class RatingService {
         }
     }
 
+    @Transactional
     public RatingDto addRating(RatingDto ratingDto){
         User user = authService.getCurrentUser();
         Book book = bookService.getBookById(ratingDto.getBookId());
@@ -117,6 +118,7 @@ public class RatingService {
         }
     }
 
+    @Transactional
     public RatingDto updateRating(Long ratingId, RatingDto ratingDto){
         validateScoreValue(ratingDto.getScore());
         Rating rating = ratingRepository.findById(ratingId)

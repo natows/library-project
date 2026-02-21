@@ -1,5 +1,6 @@
 package ug.project.library.service;
 
+import ug.project.library.exceptions.ReservationNotFoundError;
 import ug.project.library.repository.ReservationRepository;
 import ug.project.library.service.AuthService;
 import ug.project.library.service.BookService;
@@ -31,9 +32,7 @@ import ug.project.library.dto.*;
 @Service
 @Transactional
 public class ReservationService {
-    //to gdzies przeniesc w logiczniejsze miejsce(ale nie enum!!)
     private static final Duration CONFIRMATION_TIME = Duration.ofHours(2);
-    private static final Duration LOAN_TIME = Duration.ofHours(336);
 
     private final ReservationRepository reservationRepository;
     private final BookService bookService;
@@ -64,7 +63,13 @@ public class ReservationService {
     }
 
 
-    private ReservationDto mapReservationToDto(Reservation reservation) {
+    @Transactional(readOnly = true)
+    public Reservation getReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundError(id));
+    }
+
+    public ReservationDto mapReservationToDto(Reservation reservation) {
         return new ReservationDto(
             reservation.getId(),
             reservation.getStatus(),
@@ -105,7 +110,7 @@ public class ReservationService {
         User user = authService.getCurrentUser();
         if (user == null) {
             throw new IllegalStateException("User must be logged in to make a reservation");
-        }// gdy niezalogowany ma odsylac do logowania narzie bedzie to
+        }
         Book book = bookService.getBookById(bookId);
         bookService.deincrementQuantityAvailable(book);
 
